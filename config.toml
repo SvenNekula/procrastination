@@ -1,4 +1,4 @@
-baseURL = "svennekula.netlify.app"
+baseURL = "https://svennekula.netlify.app/"
 title = "Your title"
 theme = "hugo-theme-m10c"
 paginate = 5
