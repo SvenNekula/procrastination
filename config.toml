@@ -25,12 +25,12 @@ avatar = "C:\\Users\\svenn\\Documents\\Documents\\GitHub\\blog\\procrastination\
     url = "https://twitter.com/NekulaSven"
 
   # Brown theme
-  #[params.style]
-  #  darkestColor = "#463625"
-  #  darkColor = "#2a3738"
-  #  primaryColor = "#eeee6a"
-  #  lightColor = "#96a879"
-  #  lightestColor = "#ffffff"
+  [params.style]
+    darkestColor = "#463625"
+    darkColor = "#2a3738"
+    primaryColor = "#eeee6a"
+    lightColor = "#96a879"
+    lightestColor = "#ffffff"
 
   # Green theme
   #[params.style]
