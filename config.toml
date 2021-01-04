@@ -2,7 +2,7 @@ baseURL = "https://svennekula.netlify.app/"
 title = "Sven Nekula"
 theme = "hugo-theme-m10c"
 paginate = 5
-avatar = "C:\\Users\\svenn\\Documents\\Documents\\GitHub\\blog\\procrastination\\resources\\_gen\\images\\avatar_blog.jpeg"
+avatar = "C:\\Users\\svenn\\Documents\\Documents\\GitHub\\blog\\procrastination\\themes\\hugo-theme-m10c\\static\\avatar_blog.jpeg"
 
 [menu]
   [[menu.main]]
