@@ -30,7 +30,7 @@ I created this blog for multiple reasons:
 * to further develope my skills with R, GitHub and whatever else I'm going to be using
 down the line
 * to be accountable and learn more by doing
-* and finally to 'productively procrastinate' as Rebecca Barter put it in her [blog](http://www.rebeccabarter.com/blog/2020-02-03_blogger/){:target="_blank"}
+* and finally to 'productively procrastinate' as Rebecca Barter put it in her [blog](http://www.rebeccabarter.com/blog/2020-02-03_blogger/){target="_blank"}
 that ultimately motivated me to start all of this. 
 
 # What will I post here?
