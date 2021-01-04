@@ -1,5 +1,5 @@
 baseURL = "https://svennekula.netlify.app/"
-title = "Your title"
+title = "Sven Nekula"
 theme = "hugo-theme-m10c"
 paginate = 5
 
@@ -14,15 +14,15 @@ paginate = 5
     url = "/tags/"
 
 [params]
-  author = "John Doe"
-  description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vehicula turpis sit amet elit pretium."
+  author = "Sven Nekula"
+  description = "Welcome to my personal blog!"
   menu_item_separator = " - "
   [[params.social]]
     name = "github"
-    url = "https://github.com/gohugoio"
+    url = "https://github.com/SvenNekula"
   [[params.social]]
     name = "twitter"
-    url = "https://twitter.com/gohugoio"
+    url = "https://twitter.com/NekulaSven"
 
   # Brown theme
   #[params.style]
