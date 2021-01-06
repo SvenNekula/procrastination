@@ -1,9 +1,0 @@
----
-title: "Machine learning project Pt. I"
-author: "Sven Nekula"
-date: 2021-01-06
-categories: ["R"]
-tags: ["ML"]
----
-
-#Placeholder
