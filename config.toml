@@ -1,5 +1,5 @@
 baseURL = "https://svennekula.netlify.app/"
-title = "Sven Nekula"
+title = "latest posts"
 theme = "hugo-theme-m10c"
 paginate = 5
 avatar = "C:\\Users\\svenn\\Documents\\Documents\\GitHub\\blog\\procrastination\\themes\\hugo-theme-m10c\\static\\avatar.jpg"
@@ -15,7 +15,7 @@ avatar = "C:\\Users\\svenn\\Documents\\Documents\\GitHub\\blog\\procrastination\
     url = "/tags/"
 
 [params]
-  author = "blog posts"
+  author = "Sven Nekuka"
   description = "Welcome to my personal blog!"
   menu_item_separator = " - "
   [[params.social]]
