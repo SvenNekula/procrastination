@@ -40,7 +40,7 @@ tasks. I'm also really interested in learning more about machine learning, so ex
 machine learning project soon. 
 
 
-#Some more Words...
+# Some more Words...
 
 Even though I'll try to post here weekly, I can't promise that it will always be the case.
 
