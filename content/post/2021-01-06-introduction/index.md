@@ -14,7 +14,7 @@ tags:
 
 My name is Sven Nekula, I'm 23 years old and I graduated from the Friedrich-Alexander-
 University in the summer of 2020 with a Bachelor of Arts in Economics and Sociology.
-Since November 2020 I've been studying Survey Statistics at the Otto-Friedrich-University in Bamberg. 
+Since November 2020 I've been studying Survey Statistics at the Otto-Friedrich-University in Bamberg.
 The first time I came into contact with statistics was in the third semester of my
 bachelor studies. I quickly realized, that I enjoyed statistics the most out of all
 my classes and thus decided to attend more and more classes that dealt with statistics.
@@ -30,7 +30,7 @@ I created this blog for multiple reasons:
 * to further develope my skills with R, GitHub and whatever else I'm going to be using
 down the line
 * to be accountable and learn more by doing
-* and finally to 'productively procrastinate' as Rebecca Barter put it in her [blog](http://www.rebeccabarter.com/blog/2020-02-03_blogger/){target="_blank"}
+* and finally to 'productively procrastinate' as Rebecca Barter put it in her [blog](http://www.rebeccabarter.com/blog/2020-02-03_blogger/){tartget="_blank"}
 that ultimately motivated me to start all of this. 
 
 # What will I post here?
