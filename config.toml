@@ -3,6 +3,7 @@ title = "Sven Nekula"
 theme = "hugo-theme-m10c"
 paginate = 5
 avatar = "C:\\Users\\svenn\\Documents\\Documents\\GitHub\\blog\\procrastination\\themes\\hugo-theme-m10c\\static\\avatar.jpg"
+
 [menu]
   [[menu.main]]
     identifier = "home"

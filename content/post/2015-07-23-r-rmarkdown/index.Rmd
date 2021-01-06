@@ -1,7 +1,7 @@
 ---
 title: "Introductory post!"
 author: "Sven Nekula"
-date: 2021-01-04
+date: 2021-01-06
 categories: ["R"]
 tags: ["Introduction"]
 ---
@@ -34,3 +34,15 @@ down the line
 that ultimately motivated me to start all of this. 
 
 # What will I post here?
+
+I will post different projects on here. Those will range from personal projects to university
+tasks. I'm also really interested in learning more about machine learning, so expect a
+machine learning project soon. 
+
+
+Even though I'll try to post here weekly, I can't promise that it will always be the case.
+
+Especially during february-march resp. july-august I'm probably swamped due to university
+assignments and exams, but I will try my best.
+
+I think that's all I have to say right now. See you next time! -SN
