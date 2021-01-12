@@ -1,0 +1,101 @@
+---
+title: '[F] First attempt at ML with R: Image recognition'
+author: Sven
+date: '2021-01-12'
+slug: []
+categories:
+  - R
+  - ML
+tags:
+  - machine learning
+  - image recognition
+---
+
+# Intro
+
+Hello again. Unfortunately it took longer than I had anticipated to create another
+post. I've spent a lot of time lately trying to set up Ubuntu on my desktop PC to use
+features like GPU-accelerated tensorflow etc. 
+
+Anyway, as I stated in my introductory post, I'm interested in learning more about machine
+learning. That's why I started working on my first machine learning project with R, 
+which I will present in this post.
+
+# The project
+
+I chose image recognition as my first project utilizing machine learning. I chose 
+image recognition, because I think it shows the general concept of machine learning quite well.
+As for the pictures I used, I chose pictures of three different kinds of mammals: 
+cats, orangutans and sloths. There's not really a reason behind that choice, other
+than me liking those animals a lot. So let's go through the project from the beginning.
+
+```{r}
+#loading packages
+if(!require(keras)){
+    install.packages("keras")
+    library(keras)
+}
+
+if(!require(EBImage)){
+    install.packages("EBImage")
+    library(EBImage)
+}
+```
+
+So as usual we have to load our packages first. For this project we will use "keras"
+for the machine learning elements and "EBImage" to read/resize the pictures.
+
+```{r}
+#reading files
+setwd("ML1_Images")
+pictures <- c("c1.jpg", "c2.jpg", "c3.jpg", "c4.jpg", "c5.jpg", "c6.jpg", "c7.jpg", "c8.jpg", "c9.jpg", "c10.jpg",
+              "o1.jpg", "o2.jpg", "o3.jpg", "o4.jpg", "o5.jpg", "o6.jpg", "o7.jpg", "o8.jpg", "o9.jpg", "o10.jpg",
+              "s1.jpg", "s2.jpg", "s3.jpg", "s4.jpg", "s5.jpg", "s6.jpg", "s7.jpg", "s8.jpg", "s9.jpg", "s10.jpg")
+
+mypictures <- list()
+
+for (i in 1:30){
+  mypictures[[i]] <- readImage(pictures[i])
+}
+```
+
+In this next step we're setting a working directory first, then read the images.
+After this we're creating an empty list and filling it up with our pictures using a
+for loop.
+
+Let's get an overview of what we're working with:
+
+```{r}
+display(mypictures[[1]])
+
+```
+
+As you can see our first image is an image of a cat, 
+
+```{r}
+print(mypictures[[1]])
+```
+
+but after reading it into R it turned into a data-matrix.
+
+It can also be visualized using a histogram, displaying the RGB (Red Geen Blue) pixels. 
+
+```{r, echo=FALSE}
+hist(mypictures[[1]])
+```
+
+At the moment all of our images have different sizes. Some examples (images 1, 11, 21)
+can be seen in the following output
+
+```{r, echo=FALSE}
+str(mypictures[[1]])
+str(mypictures[[11]])
+str(mypictures[[21]])
+```
+
+So the next step is to resize all of the images to the same size. We do this using 
+a for loop and the array_reshape command.
+
+
+WORK IN PROGRESS
+

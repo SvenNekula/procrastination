@@ -1,0 +1,95 @@
+---
+title: '[F] First attempt at ML with R: Image recognition'
+author: Sven
+date: '2021-01-12'
+slug: []
+categories:
+  - R
+  - ML
+tags:
+  - machine learning
+  - image recognition
+---
+
+
+
+<div id="intro" class="section level1">
+<h1>Intro</h1>
+<p>Hello again. Unfortunately it took longer than I had anticipated to create another
+post. I’ve spent a lot of time lately trying to set up Ubuntu on my desktop PC to use
+features like GPU-accelerated tensorflow etc.</p>
+<p>Anyway, as I stated in my introductory post, I’m interested in learning more about machine
+learning. That’s why I started working on my first machine learning project with R,
+which I will present in this post.</p>
+</div>
+<div id="the-project" class="section level1">
+<h1>The project</h1>
+<p>I chose image recognition as my first project utilizing machine learning. I chose
+image recognition, because I think it shows the general concept of machine learning quite well.
+As for the pictures I used, I chose pictures of three different kinds of mammals:
+cats, orangutans and sloths. There’s not really a reason behind that choice, other
+than me liking those animals a lot. So let’s go through the project from the beginning.</p>
+<pre class="r"><code>#loading packages
+if(!require(keras)){
+    install.packages(&quot;keras&quot;)
+    library(keras)
+}</code></pre>
+<pre><code>## Lade nötiges Paket: keras</code></pre>
+<pre class="r"><code>if(!require(EBImage)){
+    install.packages(&quot;EBImage&quot;)
+    library(EBImage)
+}</code></pre>
+<pre><code>## Lade nötiges Paket: EBImage</code></pre>
+<p>So as usual we have to load our packages first. For this project we will use “keras”
+for the machine learning elements and “EBImage” to read/resize the pictures.</p>
+<pre class="r"><code>#reading files
+setwd(&quot;ML1_Images&quot;)
+pictures &lt;- c(&quot;c1.jpg&quot;, &quot;c2.jpg&quot;, &quot;c3.jpg&quot;, &quot;c4.jpg&quot;, &quot;c5.jpg&quot;, &quot;c6.jpg&quot;, &quot;c7.jpg&quot;, &quot;c8.jpg&quot;, &quot;c9.jpg&quot;, &quot;c10.jpg&quot;,
+              &quot;o1.jpg&quot;, &quot;o2.jpg&quot;, &quot;o3.jpg&quot;, &quot;o4.jpg&quot;, &quot;o5.jpg&quot;, &quot;o6.jpg&quot;, &quot;o7.jpg&quot;, &quot;o8.jpg&quot;, &quot;o9.jpg&quot;, &quot;o10.jpg&quot;,
+              &quot;s1.jpg&quot;, &quot;s2.jpg&quot;, &quot;s3.jpg&quot;, &quot;s4.jpg&quot;, &quot;s5.jpg&quot;, &quot;s6.jpg&quot;, &quot;s7.jpg&quot;, &quot;s8.jpg&quot;, &quot;s9.jpg&quot;, &quot;s10.jpg&quot;)
+
+mypictures &lt;- list()
+
+for (i in 1:30){
+  mypictures[[i]] &lt;- readImage(pictures[i])
+}</code></pre>
+<p>In this next step we’re setting a working directory first, then read the images.
+After this we’re creating an empty list and filling it up with our pictures using a
+for loop.</p>
+<p>Let’s get an overview of what we’re working with:</p>
+<pre class="r"><code>display(mypictures[[1]])</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>As you can see our first image is an image of a cat,</p>
+<pre class="r"><code>print(mypictures[[1]])</code></pre>
+<pre><code>## Image 
+##   colorMode    : Color 
+##   storage.mode : double 
+##   dim          : 1000 666 3 
+##   frames.total : 3 
+##   frames.render: 1 
+## 
+## imageData(object)[1:5,1:6,1]
+##      [,1] [,2] [,3] [,4] [,5] [,6]
+## [1,]    1    1    1    1    1    1
+## [2,]    1    1    1    1    1    1
+## [3,]    1    1    1    1    1    1
+## [4,]    1    1    1    1    1    1
+## [5,]    1    1    1    1    1    1</code></pre>
+<p>but after reading it into R it turned into a data-matrix.</p>
+<p>It can also be visualized using a histogram, displaying the RGB (Red Geen Blue) pixels.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>At the moment all of our images have different sizes. Some examples (images 1, 11, 21)
+can be seen in the following output</p>
+<pre><code>## Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   ..@ .Data    : num [1:1000, 1:666, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   ..@ colormode: int 2</code></pre>
+<pre><code>## Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   ..@ .Data    : num [1:600, 1:335, 1:3] 0.69 0.69 0.698 0.702 0.71 ...
+##   ..@ colormode: int 2</code></pre>
+<pre><code>## Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   ..@ .Data    : num [1:3000, 1:2000, 1:3] 0.173 0.2 0.157 0.137 0.157 ...
+##   ..@ colormode: int 2</code></pre>
+<p>So the next step is to resize all of the images to the same size. We do this using
+a for loop and the array_reshape command.</p>
+<p>WORK IN PROGRESS</p>
+</div>
