@@ -130,4 +130,147 @@ str(mypictures)</code></pre>
 ##  $ : num [1:48, 1:48, 1:3] 0.937 0.823 0.74 0.944 0.841 ...
 ##  $ : num [1:48, 1:48, 1:3] 0.319 0.35 0.453 0.833 0.386 ...
 ##  $ : num [1:48, 1:48, 1:3] 0.253 0.33 0.363 0.404 0.451 ...</code></pre>
+<p>So we successfully resized the pictures to be 48x48 pixels. With the array_reshape()
+command we changed their structure by flattening the natrices.</p>
+<p>Next up we’re going to bind our data.</p>
+<pre class="r"><code>#binding the data
+#training set
+trainx &lt;- vector()
+
+#cat pictures
+for (i in 1:8){
+  trainx &lt;- rbind(trainx, mypictures[[i]])
+}
+
+#orangutang pictures
+for (i in 11:18){
+  trainx &lt;- rbind(trainx, mypictures[[i]])
+}
+
+#sloth pictures
+for (i in 21:28){
+  trainx &lt;- rbind(trainx, mypictures[[i]])
+}
+
+#testing set
+testx &lt;- vector()
+
+for (i in c(9,10,19,20,29,30)){
+  testx &lt;- rbind(testx, mypictures[[i]])
+}</code></pre>
+<p>We divided our data into two sets. A training set and a testing set.
+24 of the 30 images are in training set (8 images per class), while the
+other 6 images are used for the testing set (2 images per class).</p>
+<pre class="r"><code>#y variables: 0=cat, 1=orangutan, 2=sloth
+trainy &lt;- c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2)
+testy &lt;- c(0,0,1,1,2,2)
+
+trainLabels &lt;- to_categorical(trainy)
+testLabels &lt;- to_categorical(testy)</code></pre>
+<p>In this step we defined our y-Variables (or the classes of the images) and converted
+them into class matrices using the to_categorical() command.</p>
+<p>Now we completed the data-wrangling and can create the actual model.</p>
+<pre class="r"><code>model &lt;- keras_model_sequential()
+model %&gt;%
+  layer_dense(units = 256, activation = &quot;relu&quot;, input_shape = c(6912)) %&gt;%
+  layer_dense(units = 128, activation = &quot;relu&quot;) %&gt;%
+  layer_dense(units = 3, activation = &quot;softmax&quot;)</code></pre>
+<p>We’re using three hidden layers for our model. The pipe-operator %&gt;% is used to pass our lines
+onto the next ones.</p>
+<p>In the first hidden layer where using 256 neurons (=units). This number could
+always be changed to see what kind of impact it has.</p>
+<p>As for the activation function, we’re using the most popular one:
+the rectified linear activation function (short=“relu”). If you want to learn more
+about the relu function, click <a href="https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/#:~:text=The%20rectified%20linear%20activation%20function,otherwise%2C%20it%20will%20output%20zero.&amp;text=The%20rectified%20linear%20activation%20is,Perceptron%20and%20convolutional%20neural%20networks." target="_blank">here</a></p>
+<p>The value 6912 for the input_shape() command is related to our data.
+Earlier we resized and reshaped it to 48x48x3 –&gt; 48 * 48 * 3 = 6912.</p>
+<p>In the second hidden layer we’re using 128 neurons as it’s the half of 256. But once
+again, these parameters can be changed. We also use the same activation function as in
+the first layer.</p>
+<p>In the third and last hidden layer we specify how many classes our images can take on
+(units=3; cat/orangutan/sloth) and use the softmax activation function, as it’s used for
+categorical data.</p>
+<pre><code>## Model: &quot;sequential&quot;
+## ________________________________________________________________________________
+## Layer (type)                        Output Shape                    Param #     
+## ================================================================================
+## dense_2 (Dense)                     (None, 256)                     1769728     
+## ________________________________________________________________________________
+## dense_1 (Dense)                     (None, 128)                     32896       
+## ________________________________________________________________________________
+## dense (Dense)                       (None, 3)                       387         
+## ================================================================================
+## Total params: 1,803,011
+## Trainable params: 1,803,011
+## Non-trainable params: 0
+## ________________________________________________________________________________</code></pre>
+<p>In this summary of the model you can see the number of parameters. And once again
+they’re related to our data. The number of parameters in the first hidden layer is
+1769728 –&gt; 6912 * 256 + 256 = 1769728.</p>
+<p>Now we can compile the model.</p>
+<pre class="r"><code>#compiling model
+model %&gt;%
+  compile(loss = &quot;categorical_crossentropy&quot;,
+          optimizer = optimizer_rmsprop(),
+          metrics = c(&quot;accuracy&quot;))</code></pre>
+<p>We’re using “categorical_crossentropy”, because we’re working with categorical data.
+After compiling the model we can fit the model.</p>
+<pre class="r"><code>#fitting model
+history &lt;- model %&gt;%
+  fit(trainx,
+      trainLabels,
+      epochs = 50,
+      batch_size =32,
+      validation_split = 0.2)</code></pre>
+<p>Epoch defines the number of times the algorithm will work through our training data,
+in this case we want it to work through our training data 50 times.
+As batch size we used 32 because it’s a popular batch size in the case of
+mini-batch gradient descent. 20% of the data will be used for validation, 80% for training.
+This is tuned by the validiation_split parameter.</p>
+<p>Let’s plot the model to get a better overview.</p>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>In the upper plot you can see the loss of data along the epochs, in the lower plot
+you can see the accuraxy along the epochs. The training data is shown by the red line,
+the validation or testing data is shown by the blue line. Let’s look at more data to
+evaluate the model.</p>
+<pre><code>##      loss  accuracy 
+## 2.2530499 0.6666667</code></pre>
+<pre><code>##                                             Predicted Actual
+##  [1,] 0.996188581 0.0037972815 1.409807e-05         0      0
+##  [2,] 0.998562515 0.0014355985 1.940601e-06         0      0
+##  [3,] 0.999203265 0.0007967816 4.119271e-08         0      0
+##  [4,] 0.998215437 0.0017843307 2.869743e-07         0      0
+##  [5,] 0.948787391 0.0508947074 3.178826e-04         0      0
+##  [6,] 0.995628953 0.0043423977 2.864071e-05         0      0
+##  [7,] 0.983965397 0.0148377083 1.196900e-03         0      0
+##  [8,] 0.932269335 0.0675853938 1.452332e-04         0      0
+##  [9,] 0.440738797 0.5588894486 3.717239e-04         1      1
+## [10,] 0.011517044 0.9883859158 9.708201e-05         1      1
+## [11,] 0.236574918 0.7626495361 7.754813e-04         1      1
+## [12,] 0.002781472 0.9972003698 1.823099e-05         1      1
+## [13,] 0.022910126 0.9770566821 3.320931e-05         1      1
+## [14,] 0.016144302 0.9838433862 1.235387e-05         1      1
+## [15,] 0.087905511 0.9120830297 1.152635e-05         1      1
+## [16,] 0.091045380 0.9088710546 8.352024e-05         1      1
+## [17,] 0.949879825 0.0168156885 3.330448e-02         0      2
+## [18,] 0.956972659 0.0311144833 1.191285e-02         0      2
+## [19,] 0.994213760 0.0052017956 5.843689e-04         0      2
+## [20,] 0.675254703 0.3246681094 7.715799e-05         0      2
+## [21,] 0.771245182 0.2281832397 5.715425e-04         0      2
+## [22,] 0.207590163 0.7919828296 4.269011e-04         1      2
+## [23,] 0.486499816 0.5094262958 4.073922e-03         1      2
+## [24,] 0.535332859 0.4640255272 6.415175e-04         0      2</code></pre>
+<p>As you can see, the model’s accuracy is ~80%.
+It recognized 19 of the 24 images correctly.
+All the false regonitions are sloths.</p>
+<p>So what could be the reason for this?</p>
+<p>Maybe the images are too similar, or the parameters could be tuned better.
+80% accuracy, while decent, is also not good enough and could be improved upon,
+either by using more data or by tuning the parameters differently.</p>
+<p>Thanks for reading my first <em>real</em> blog post! I hope you enjoyed it and/or learned
+something useful!</p>
+<p>Don’t forget to check out my GitHub, where I will update the R-code for this project ,
+and follow me on twitter!</p>
+<p>See you next time! -SN</p>
 </div>
