@@ -17,12 +17,22 @@ Hello again. Unfortunately it took longer than I had anticipated to create anoth
 post. I've spent a lot of time lately trying to set up Ubuntu on my desktop PC to use
 features like GPU-accelerated tensorflow etc. 
 
-I'm trying my best at image recognition with R, but I need some more time.
-Sorry to keep you waiting, I'll push it as soon as I figured everything out. 
+# The project
 
-SORRY!
+I chose image recognition as my first project utilizing machine learning. I chose 
+image recognition, because I think it shows the general concept of machine learning quite well.
+As for the pictures I used, I chose pictures of three different kinds of mammals: 
+cats, orangutans and sloths. There's not really a reason behind that choice, other
+than me liking those animals a lot. So let's go through the project from the beginning.
 
-```{r, echo=FALSE, message=FALSE}
+```{r setup}
+knitr::opts_knit$set(root.dir = 'ML1_Images')
+```
+
+Before starting we have to load the packages necessary. We are using keras for the 
+machine learning components and EBImage to read the images. 
+
+```{r, message=FALSE}
 #loading packages
 if(!require(keras)){
     install.packages("keras")
@@ -35,5 +45,101 @@ if(!require(EBImage)){
 }
 ```
 
+Now we can start to load our images into R. We're going to store our images in a list,
+that we'll fill with the help of a for loop.
 
+```{r}
+pictures <- c("c1.jpg", "c2.jpg", "c3.jpg", "c4.jpg", "c5.jpg", "c6.jpg", "c7.jpg", "c8.jpg", "c9.jpg", "c10.jpg",
+              "o1.jpg", "o2.jpg", "o3.jpg", "o4.jpg", "o5.jpg", "o6.jpg", "o7.jpg", "o8.jpg", "o9.jpg", "o10.jpg",
+              "s1.jpg", "s2.jpg", "s3.jpg", "s4.jpg", "s5.jpg", "s6.jpg", "s7.jpg", "s8.jpg", "s9.jpg", "s10.jpg")
+
+mypictures <- list()
+
+for (i in 1:30){
+  mypictures[[i]] <- readImage(pictures[i])
+}
+```
+
+We have 30 images in total: 10 cat pictures, 10 orangutan pictures and 10 sloth pictures.
+
+Let's get an overview of the data. For example, we're going to use the first picture
+that looks like this.
+
+```{r, echo=FALSE}
+display(mypictures[[1]])
+```
+
+As you can see the first image contains a cat.
+
+```{r, echo=FALSE}
+print(mypictures[[1]])
+summary(mypictures[[1]])
+```
+
+R transformed the image into a data-matrix containing the pixels. The images can also
+be plotted using a histogram. 
+
+```{r, echo=FALSE}
+hist(mypictures[[1]])
+```
+
+The histogram has three colors for a reason. The images are made up of three different
+kinds of pixels. Red pixels, green pixels and blue pixels (RGB). At the moment all 
+of our images have different sizes as you can see in the following output. 
+
+```{r, echo=FALSE}
+str(mypictures[[1]])
+str(mypictures[[11]])
+str(mypictures[[21]])
+```
+
+But we want the images to have the same size. We will resize them to smalles images.
+And while we're at it, we're going to convert the reshape the pictures as well. 
+
+```{r}
+#resizing images
+for (i in 1:30){
+  mypictures[[i]] <- resize(mypictures[[i]], 48, 48)
+}
+
+#reshaping images
+for (i in 1:30){
+  mypictures[[i]] <- array_reshape(mypictures[[i]], c(48, 48, 3))
+}
+
+str(mypictures)
+```
+
+So we successfully resized the pictures to be 48x48 pixels. With the array_reshape 
+command we changed their structure by flattening the natrices.
+
+Next up we're going to bind our data.
+
+```{r}
+#binding the data
+#training set
+trainx <- vector()
+
+#cat pictures
+for (i in 1:8){
+  trainx <- rbind(trainx, mypictures[[i]])
+}
+
+#orangutang pictures
+for (i in 11:18){
+  trainx <- rbind(trainx, mypictures[[i]])
+}
+
+#sloth pictures
+for (i in 21:28){
+  trainx <- rbind(trainx, mypictures[[i]])
+}
+
+#testing set
+testx <- vector()
+
+for (i in c(9,10,19,20,29,30)){
+  testx <- rbind(testx, mypictures[[i]])
+}
+```
 
