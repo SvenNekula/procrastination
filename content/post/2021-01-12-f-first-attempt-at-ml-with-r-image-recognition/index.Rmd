@@ -1,0 +1,273 @@
+---
+title: '[F] First attempt at ML with R: Image classification'
+author: Sven
+date: '2021-01-12'
+slug: []
+categories:
+  - R
+  - ML
+tags:
+  - machine learning
+  - image recognition
+---
+
+# Intro
+
+Hello again. Unfortunately it took longer than I had anticipated to create another
+post. I've spent a lot of time lately trying to set up Ubuntu on my desktop PC to use
+as my main coding/data-science machine in the future.
+
+# The project
+
+I chose image recognition as my first project utilizing machine learning. I chose 
+image classification, because I think it shows the general concept of machine learning quite well.
+As for the pictures I used, I chose pictures of three different kinds of mammals: 
+cats, orangutans and sloths. There's not really a reason behind that choice, other
+than me liking those animals a lot. So let's go through the project from the beginning.
+
+```{r setup, echo=FALSE}
+knitr::opts_knit$set(root.dir = 'ML1_Images')
+```
+
+Before starting we have to set a working directory, set a seed andload the packages necessary. We are using keras for the 
+machine learning components and EBImage to read the images. We set a seed to make
+the model reproducible.
+
+```{r, message=FALSE}
+#for reproducability
+set.seed(123)
+
+#loading packages
+if(!require(keras)){
+    install.packages("keras")
+    library(keras)
+}
+
+if(!require(EBImage)){
+    install.packages("EBImage")
+    library(EBImage)
+}
+```
+
+Now we can start to load our images into R. We're going to store our images in a list,
+that we'll fill with the help of a for loop.
+
+```{r}
+pictures <- c("c1.jpg", "c2.jpg", "c3.jpg", "c4.jpg", "c5.jpg", "c6.jpg", "c7.jpg", "c8.jpg", "c9.jpg", "c10.jpg",
+              "o1.jpg", "o2.jpg", "o3.jpg", "o4.jpg", "o5.jpg", "o6.jpg", "o7.jpg", "o8.jpg", "o9.jpg", "o10.jpg",
+              "s1.jpg", "s2.jpg", "s3.jpg", "s4.jpg", "s5.jpg", "s6.jpg", "s7.jpg", "s8.jpg", "s9.jpg", "s10.jpg")
+
+mypictures <- list()
+
+for (i in 1:30){
+  mypictures[[i]] <- readImage(pictures[i])
+}
+```
+
+We have 30 images in total: 10 cat pictures, 10 orangutan pictures and 10 sloth pictures.
+
+Let's get an overview of the data. For example, we're going to use the first picture
+that looks like this.
+
+```{r, echo=FALSE}
+display(mypictures[[1]])
+```
+
+As you can see the first image contains a cat.
+
+```{r, echo=FALSE}
+print(mypictures[[1]])
+summary(mypictures[[1]])
+```
+
+R transformed the image into a data-matrix containing the pixels. The images can also
+be plotted using a histogram. 
+
+```{r, echo=FALSE}
+hist(mypictures[[1]])
+```
+
+The histogram has three colors for a reason. The images are made up of three different
+kinds of pixels. Red pixels, green pixels and blue pixels (RGB). At the moment all 
+of our images have different sizes as you can see in the following output. 
+
+```{r, echo=FALSE}
+str(mypictures[[1]])
+str(mypictures[[11]])
+str(mypictures[[21]])
+```
+
+But we want the images to have the same size. We will resize them to smalles images.
+And while we're at it, we're going to convert the reshape the pictures as well. 
+
+```{r}
+#resizing images
+for (i in 1:30){
+  mypictures[[i]] <- resize(mypictures[[i]], 48, 48)
+}
+
+#reshaping images
+for (i in 1:30){
+  mypictures[[i]] <- array_reshape(mypictures[[i]], c(48, 48, 3))
+}
+
+str(mypictures)
+```
+
+So we successfully resized the pictures to be 48x48 pixels. With the array_reshape() 
+command we changed their structure by flattening the natrices.
+
+Next up we're going to bind our data.
+
+```{r}
+#binding the data
+#training set
+trainx <- vector()
+
+#cat pictures
+for (i in 1:8){
+  trainx <- rbind(trainx, mypictures[[i]])
+}
+
+#orangutang pictures
+for (i in 11:18){
+  trainx <- rbind(trainx, mypictures[[i]])
+}
+
+#sloth pictures
+for (i in 21:28){
+  trainx <- rbind(trainx, mypictures[[i]])
+}
+
+#testing set
+testx <- vector()
+
+for (i in c(9,10,19,20,29,30)){
+  testx <- rbind(testx, mypictures[[i]])
+}
+
+```
+
+We divided our data into two sets. A training set and a testing set.
+24 of the 30 images are in training set (8 images per class), while the 
+other 6 images are used for the testing set (2 images per class). 
+
+```{r}
+#y variables: 0=cat, 1=orangutan, 2=sloth
+trainy <- c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2)
+testy <- c(0,0,1,1,2,2)
+
+trainLabels <- to_categorical(trainy)
+testLabels <- to_categorical(testy)
+```
+
+In this step we defined our y-Variables (or the classes of the images) and converted
+them into class matrices using the to_categorical() command.
+
+Now we completed the data-wrangling and can create the actual model.
+
+```{r}
+model <- keras_model_sequential()
+model %>%
+  layer_dense(units = 256, activation = "relu", input_shape = c(6912), 
+              kernel_initializer = initializer_random_uniform(minval = -0.05, maxval = 0.05, seed = 123)) %>%
+  layer_dense(units = 128, activation = "relu", 
+              kernel_initializer = initializer_random_uniform(minval = -0.05, maxval = 0.05, seed = 123)) %>%
+  layer_dense(units = 3, activation = "softmax",
+              kernel_initializer = initializer_random_uniform(minval = -0.05, maxval = 0.05, seed = 123))
+```
+
+We're using three hidden layers for our model. The pipe-operator %>% is used to pass our lines
+onto the next ones.
+
+In the first hidden layer where using 256 neurons (=units). This number could 
+always be changed to see what kind of impact it has. 
+
+As for the activation function, we're using the most popular one:
+the rectified linear activation function (short="relu"). If you want to learn more
+about the relu function, click [here](https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/#:~:text=The%20rectified%20linear%20activation%20function,otherwise%2C%20it%20will%20output%20zero.&text=The%20rectified%20linear%20activation%20is,Perceptron%20and%20convolutional%20neural%20networks.){target="_blank"}.
+
+The value 6912 for the input_shape() command is related to our data.
+Earlier we resized and reshaped it to 48x48x3 --> 48 * 48 * 3 = 6912.
+
+In the second hidden layer we're using 128 neurons as it's the half of 256. But once 
+again, these parameters can be changed. We also use the same activation function as in 
+the first layer.
+
+In the third and last hidden layer we specify how many classes our images can take on
+(units=3; cat/orangutan/sloth) and use the softmax activation function, as it's used for 
+categorical data. 
+
+```{r, echo=FALSE}
+summary(model)
+```
+
+In this summary of the model you can see the number of parameters. And once again
+they're related to our data. The number of parameters in the first hidden layer is
+1769728 --> 6912 * 256 + 256 = 1769728.
+
+Now we can compile the model.
+
+```{r}
+#compiling model
+model %>%
+  compile(loss = "categorical_crossentropy",
+          optimizer = optimizer_rmsprop(),
+          metrics = c("accuracy"))
+```
+
+We're using "categorical_crossentropy", because we're working with categorical data.
+After compiling the model we can fit the model.
+
+```{r}
+#fitting model
+history <- model %>%
+  fit(trainx,
+      trainLabels,
+      epochs = 50,
+      batch_size =32,
+      validation_split = 0.2)
+```
+
+Epoch defines the number of times the algorithm will work through our training data,
+in this case we want it to work through our training data 50 times. 
+As batch size we used 32 because it's a popular batch size in the case of 
+mini-batch gradient descent. 20% of the data will be used for validation, 80% for training.
+This is tuned by the validiation_split parameter.
+
+Let's plot the model to get a better overview.
+
+```{r, echo=FALSE}
+plot(history)
+```
+
+In the upper plot you can see the loss of data along the epochs, in the lower plot
+you can see the accuraxy along the epochs. The training data is shown by the red line,
+the validation or testing data is shown by the blue line. Let's look at more data to 
+evaluate the model.
+
+```{r, echo=FALSE}
+model %>% evaluate(trainx, trainLabels)
+prediction <- model %>% predict_classes(trainx)
+probability <- model %>% predict_proba(trainx)
+cbind(probability, Predicted = prediction, Actual=trainy)
+```
+
+As you can see, the model's accuracy is ~80%. 
+It classified 19 of the 24 images correctly. 
+All the false classifications are sloths.
+
+So what could be the reason for this?
+
+Maybe the images are too similar, or the parameters could be tuned better.
+80% accuracy, while decent, is also not good enough and could be improved upon,
+either by using more data or by tuning the parameters differently.
+But for now I'm fine with it because as I said it's my first attempt at it. 
+
+Thanks for reading my first **real** blog post! I hope you enjoyed it and/or learned
+something useful!
+
+Don't forget to check out my GitHub, where I will update the R-code for this project ,
+and follow me on twitter!
+
+See you next time! -SN

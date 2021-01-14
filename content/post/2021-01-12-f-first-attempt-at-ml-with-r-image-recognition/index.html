@@ -1,0 +1,276 @@
+---
+title: '[F] First attempt at ML with R: Image recognition'
+author: Sven
+date: '2021-01-12'
+slug: []
+categories:
+  - R
+  - ML
+tags:
+  - machine learning
+  - image recognition
+---
+
+
+
+<div id="intro" class="section level1">
+<h1>Intro</h1>
+<p>Hello again. Unfortunately it took longer than I had anticipated to create another
+post. I’ve spent a lot of time lately trying to set up Ubuntu on my desktop PC to use
+features like GPU-accelerated tensorflow etc.</p>
+</div>
+<div id="the-project" class="section level1">
+<h1>The project</h1>
+<p>I chose image recognition as my first project utilizing machine learning. I chose
+image recognition, because I think it shows the general concept of machine learning quite well.
+As for the pictures I used, I chose pictures of three different kinds of mammals:
+cats, orangutans and sloths. There’s not really a reason behind that choice, other
+than me liking those animals a lot. So let’s go through the project from the beginning.</p>
+<pre class="r"><code>knitr::opts_knit$set(root.dir = &#39;ML1_Images&#39;)</code></pre>
+<p>Before starting we have to load the packages necessary. We are using keras for the
+machine learning components and EBImage to read the images.</p>
+<pre class="r"><code>#loading packages
+if(!require(keras)){
+    install.packages(&quot;keras&quot;)
+    library(keras)
+}
+
+if(!require(EBImage)){
+    install.packages(&quot;EBImage&quot;)
+    library(EBImage)
+}</code></pre>
+<p>Now we can start to load our images into R. We’re going to store our images in a list,
+that we’ll fill with the help of a for loop.</p>
+<pre class="r"><code>pictures &lt;- c(&quot;c1.jpg&quot;, &quot;c2.jpg&quot;, &quot;c3.jpg&quot;, &quot;c4.jpg&quot;, &quot;c5.jpg&quot;, &quot;c6.jpg&quot;, &quot;c7.jpg&quot;, &quot;c8.jpg&quot;, &quot;c9.jpg&quot;, &quot;c10.jpg&quot;,
+              &quot;o1.jpg&quot;, &quot;o2.jpg&quot;, &quot;o3.jpg&quot;, &quot;o4.jpg&quot;, &quot;o5.jpg&quot;, &quot;o6.jpg&quot;, &quot;o7.jpg&quot;, &quot;o8.jpg&quot;, &quot;o9.jpg&quot;, &quot;o10.jpg&quot;,
+              &quot;s1.jpg&quot;, &quot;s2.jpg&quot;, &quot;s3.jpg&quot;, &quot;s4.jpg&quot;, &quot;s5.jpg&quot;, &quot;s6.jpg&quot;, &quot;s7.jpg&quot;, &quot;s8.jpg&quot;, &quot;s9.jpg&quot;, &quot;s10.jpg&quot;)
+
+mypictures &lt;- list()
+
+for (i in 1:30){
+  mypictures[[i]] &lt;- readImage(pictures[i])
+}</code></pre>
+<p>We have 30 images in total: 10 cat pictures, 10 orangutan pictures and 10 sloth pictures.</p>
+<p>Let’s get an overview of the data. For example, we’re going to use the first picture
+that looks like this.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>As you can see the first image contains a cat.</p>
+<pre><code>## Image 
+##   colorMode    : Color 
+##   storage.mode : double 
+##   dim          : 1000 666 3 
+##   frames.total : 3 
+##   frames.render: 1 
+## 
+## imageData(object)[1:5,1:6,1]
+##      [,1] [,2] [,3] [,4] [,5] [,6]
+## [1,]    1    1    1    1    1    1
+## [2,]    1    1    1    1    1    1
+## [3,]    1    1    1    1    1    1
+## [4,]    1    1    1    1    1    1
+## [5,]    1    1    1    1    1    1</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  0.0000  0.3804  0.5529  0.5434  0.7098  1.0000</code></pre>
+<p>R transformed the image into a data-matrix containing the pixels. The images can also
+be plotted using a histogram.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>The histogram has three colors for a reason. The images are made up of three different
+kinds of pixels. Red pixels, green pixels and blue pixels (RGB). At the moment all
+of our images have different sizes as you can see in the following output.</p>
+<pre><code>## Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   ..@ .Data    : num [1:1000, 1:666, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##   ..@ colormode: int 2</code></pre>
+<pre><code>## Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   ..@ .Data    : num [1:600, 1:335, 1:3] 0.69 0.69 0.698 0.702 0.71 ...
+##   ..@ colormode: int 2</code></pre>
+<pre><code>## Formal class &#39;Image&#39; [package &quot;EBImage&quot;] with 2 slots
+##   ..@ .Data    : num [1:3000, 1:2000, 1:3] 0.173 0.2 0.157 0.137 0.157 ...
+##   ..@ colormode: int 2</code></pre>
+<p>But we want the images to have the same size. We will resize them to smalles images.
+And while we’re at it, we’re going to convert the reshape the pictures as well.</p>
+<pre class="r"><code>#resizing images
+for (i in 1:30){
+  mypictures[[i]] &lt;- resize(mypictures[[i]], 48, 48)
+}
+
+#reshaping images
+for (i in 1:30){
+  mypictures[[i]] &lt;- array_reshape(mypictures[[i]], c(48, 48, 3))
+}
+
+str(mypictures)</code></pre>
+<pre><code>## List of 30
+##  $ : num [1:48, 1:48, 1:3] 1 1 1 1 1 ...
+##  $ : num [1:48, 1:48, 1:3] 0.647 0.639 0.646 0.703 0.75 ...
+##  $ : num [1:48, 1:48, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+##  $ : num [1:48, 1:48, 1:3] 0.855 0.855 0.851 0.859 0.863 ...
+##  $ : num [1:48, 1:48, 1:3] 0.251 0.246 0.261 0.242 0.254 ...
+##  $ : num [1:48, 1:48, 1:3] 0.437 0.584 0.579 0.593 0.266 ...
+##  $ : num [1:48, 1:48, 1:3] 0.098 0.0946 0.0667 0.0511 0.055 ...
+##  $ : num [1:48, 1:48, 1:3] 0.108 0.115 0.11 0.116 0.123 ...
+##  $ : num [1:48, 1:48, 1:3] 0.537 0.545 0.553 0.561 0.569 ...
+##  $ : num [1:48, 1:48, 1:3] 0.1061 0.0784 0.0785 0.1127 0.1219 ...
+##  $ : num [1:48, 1:48, 1:3] 0.72 0.755 0.769 0.757 0.743 ...
+##  $ : num [1:48, 1:48, 1:3] 0.225 0.0688 0.1193 0.0705 0.3223 ...
+##  $ : num [1:48, 1:48, 1:3] 0.388 0.315 0.301 0.295 0.339 ...
+##  $ : num [1:48, 1:48, 1:3] 0.1935 0.1157 0.0974 0.0902 0.0686 ...
+##  $ : num [1:48, 1:48, 1:3] 0.378 0.12 0.15 0.309 0.498 ...
+##  $ : num [1:48, 1:48, 1:3] 0.3846 0.2123 0.0881 0.6182 0.2205 ...
+##  $ : num [1:48, 1:48, 1:3] 0.396 0.417 0.442 0.433 0.433 ...
+##  $ : num [1:48, 1:48, 1:3] 0.192 0.235 0.658 0.282 0.167 ...
+##  $ : num [1:48, 1:48, 1:3] 0.188 0.202 0.223 0.536 0.223 ...
+##  $ : num [1:48, 1:48, 1:3] 0.456 0.471 0.566 0.586 0.473 ...
+##  $ : num [1:48, 1:48, 1:3] 0.694 0.293 0.168 0.523 0.626 ...
+##  $ : num [1:48, 1:48, 1:3] 0.365 0.34 0.288 0.358 0.335 ...
+##  $ : num [1:48, 1:48, 1:3] 0.873 0.573 0.802 0.875 0.875 ...
+##  $ : num [1:48, 1:48, 1:3] 0.185 0.147 0.127 0.179 0.151 ...
+##  $ : num [1:48, 1:48, 1:3] 0.478 0.487 0.406 0.291 0.265 ...
+##  $ : num [1:48, 1:48, 1:3] 0.231 0.275 0.216 0.232 0.275 ...
+##  $ : num [1:48, 1:48, 1:3] 0.481 0.629 0.569 0.63 0.8 ...
+##  $ : num [1:48, 1:48, 1:3] 0.937 0.823 0.74 0.944 0.841 ...
+##  $ : num [1:48, 1:48, 1:3] 0.319 0.35 0.453 0.833 0.386 ...
+##  $ : num [1:48, 1:48, 1:3] 0.253 0.33 0.363 0.404 0.451 ...</code></pre>
+<p>So we successfully resized the pictures to be 48x48 pixels. With the array_reshape()
+command we changed their structure by flattening the natrices.</p>
+<p>Next up we’re going to bind our data.</p>
+<pre class="r"><code>#binding the data
+#training set
+trainx &lt;- vector()
+
+#cat pictures
+for (i in 1:8){
+  trainx &lt;- rbind(trainx, mypictures[[i]])
+}
+
+#orangutang pictures
+for (i in 11:18){
+  trainx &lt;- rbind(trainx, mypictures[[i]])
+}
+
+#sloth pictures
+for (i in 21:28){
+  trainx &lt;- rbind(trainx, mypictures[[i]])
+}
+
+#testing set
+testx &lt;- vector()
+
+for (i in c(9,10,19,20,29,30)){
+  testx &lt;- rbind(testx, mypictures[[i]])
+}</code></pre>
+<p>We divided our data into two sets. A training set and a testing set.
+24 of the 30 images are in training set (8 images per class), while the
+other 6 images are used for the testing set (2 images per class).</p>
+<pre class="r"><code>#y variables: 0=cat, 1=orangutan, 2=sloth
+trainy &lt;- c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2)
+testy &lt;- c(0,0,1,1,2,2)
+
+trainLabels &lt;- to_categorical(trainy)
+testLabels &lt;- to_categorical(testy)</code></pre>
+<p>In this step we defined our y-Variables (or the classes of the images) and converted
+them into class matrices using the to_categorical() command.</p>
+<p>Now we completed the data-wrangling and can create the actual model.</p>
+<pre class="r"><code>model &lt;- keras_model_sequential()
+model %&gt;%
+  layer_dense(units = 256, activation = &quot;relu&quot;, input_shape = c(6912)) %&gt;%
+  layer_dense(units = 128, activation = &quot;relu&quot;) %&gt;%
+  layer_dense(units = 3, activation = &quot;softmax&quot;)</code></pre>
+<p>We’re using three hidden layers for our model. The pipe-operator %&gt;% is used to pass our lines
+onto the next ones.</p>
+<p>In the first hidden layer where using 256 neurons (=units). This number could
+always be changed to see what kind of impact it has.</p>
+<p>As for the activation function, we’re using the most popular one:
+the rectified linear activation function (short=“relu”). If you want to learn more
+about the relu function, click <a href="https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/#:~:text=The%20rectified%20linear%20activation%20function,otherwise%2C%20it%20will%20output%20zero.&amp;text=The%20rectified%20linear%20activation%20is,Perceptron%20and%20convolutional%20neural%20networks." target="_blank">here</a></p>
+<p>The value 6912 for the input_shape() command is related to our data.
+Earlier we resized and reshaped it to 48x48x3 –&gt; 48 * 48 * 3 = 6912.</p>
+<p>In the second hidden layer we’re using 128 neurons as it’s the half of 256. But once
+again, these parameters can be changed. We also use the same activation function as in
+the first layer.</p>
+<p>In the third and last hidden layer we specify how many classes our images can take on
+(units=3; cat/orangutan/sloth) and use the softmax activation function, as it’s used for
+categorical data.</p>
+<pre><code>## Model: &quot;sequential&quot;
+## ________________________________________________________________________________
+## Layer (type)                        Output Shape                    Param #     
+## ================================================================================
+## dense_2 (Dense)                     (None, 256)                     1769728     
+## ________________________________________________________________________________
+## dense_1 (Dense)                     (None, 128)                     32896       
+## ________________________________________________________________________________
+## dense (Dense)                       (None, 3)                       387         
+## ================================================================================
+## Total params: 1,803,011
+## Trainable params: 1,803,011
+## Non-trainable params: 0
+## ________________________________________________________________________________</code></pre>
+<p>In this summary of the model you can see the number of parameters. And once again
+they’re related to our data. The number of parameters in the first hidden layer is
+1769728 –&gt; 6912 * 256 + 256 = 1769728.</p>
+<p>Now we can compile the model.</p>
+<pre class="r"><code>#compiling model
+model %&gt;%
+  compile(loss = &quot;categorical_crossentropy&quot;,
+          optimizer = optimizer_rmsprop(),
+          metrics = c(&quot;accuracy&quot;))</code></pre>
+<p>We’re using “categorical_crossentropy”, because we’re working with categorical data.
+After compiling the model we can fit the model.</p>
+<pre class="r"><code>#fitting model
+history &lt;- model %&gt;%
+  fit(trainx,
+      trainLabels,
+      epochs = 50,
+      batch_size =32,
+      validation_split = 0.2)</code></pre>
+<p>Epoch defines the number of times the algorithm will work through our training data,
+in this case we want it to work through our training data 50 times.
+As batch size we used 32 because it’s a popular batch size in the case of
+mini-batch gradient descent. 20% of the data will be used for validation, 80% for training.
+This is tuned by the validiation_split parameter.</p>
+<p>Let’s plot the model to get a better overview.</p>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>In the upper plot you can see the loss of data along the epochs, in the lower plot
+you can see the accuraxy along the epochs. The training data is shown by the red line,
+the validation or testing data is shown by the blue line. Let’s look at more data to
+evaluate the model.</p>
+<pre><code>##      loss  accuracy 
+## 0.7455325 0.7916667</code></pre>
+<pre><code>##                                             Predicted Actual
+##  [1,] 0.9781156182 0.007060875 0.0148235224         0      0
+##  [2,] 0.9841300249 0.003862419 0.0120075792         0      0
+##  [3,] 0.9915374517 0.005872046 0.0025904581         0      0
+##  [4,] 0.9905920625 0.005317494 0.0040904400         0      0
+##  [5,] 0.8950932622 0.080638334 0.0242684186         0      0
+##  [6,] 0.9718229771 0.009160051 0.0190169867         0      0
+##  [7,] 0.9196797609 0.016752796 0.0635674745         0      0
+##  [8,] 0.7736937404 0.197635815 0.0286704097         0      0
+##  [9,] 0.1137151867 0.868834436 0.0174503215         1      1
+## [10,] 0.0017385932 0.996764302 0.0014970432         1      1
+## [11,] 0.0838277042 0.880229771 0.0359425582         1      1
+## [12,] 0.0007054033 0.998795867 0.0004987679         1      1
+## [13,] 0.0058028395 0.992544830 0.0016522972         1      1
+## [14,] 0.0032811309 0.995853186 0.0008656855         1      1
+## [15,] 0.0608024150 0.936793149 0.0024044800         1      1
+## [16,] 0.0273629166 0.968051672 0.0045854622         1      1
+## [17,] 0.0396098979 0.003549366 0.9568406940         2      2
+## [18,] 0.1045625582 0.031214055 0.8642234206         2      2
+## [19,] 0.0512943268 0.007607549 0.9410981536         2      2
+## [20,] 0.4425988793 0.552411139 0.0049899472         1      2
+## [21,] 0.3492200077 0.527367651 0.1234124005         1      2
+## [22,] 0.0966395438 0.886955976 0.0164044611         1      2
+## [23,] 0.1814621538 0.622746944 0.1957908720         1      2
+## [24,] 0.2871125042 0.685309947 0.0275776573         1      2</code></pre>
+<p>As you can see, the model’s accuracy is ~80%.
+It recognized 19 of the 24 images correctly.
+All the false regonitions are sloths.</p>
+<p>So what could be the reason for this?</p>
+<p>Maybe the images are too similar, or the parameters could be tuned better.
+80% accuracy, while decent, is also not good enough and could be improved upon,
+either by using more data or by tuning the parameters differently.</p>
+<p>Thanks for reading my first <em>real</em> blog post! I hope you enjoyed it and/or learned
+something useful!</p>
+<p>Don’t forget to check out my GitHub, where I will update the R-code for this project ,
+and follow me on twitter!</p>
+<p>See you next time! -SN</p>
+</div>
