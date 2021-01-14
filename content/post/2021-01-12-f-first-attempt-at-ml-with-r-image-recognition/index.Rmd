@@ -1,5 +1,5 @@
 ---
-title: '[F] First attempt at ML with R: Image recognition'
+title: '[F] First attempt at ML with R: Image classification'
 author: Sven
 date: '2021-01-12'
 slug: []
@@ -15,24 +15,28 @@ tags:
 
 Hello again. Unfortunately it took longer than I had anticipated to create another
 post. I've spent a lot of time lately trying to set up Ubuntu on my desktop PC to use
-features like GPU-accelerated tensorflow etc. 
+as my main coding/data-science machine in the future.
 
 # The project
 
 I chose image recognition as my first project utilizing machine learning. I chose 
-image recognition, because I think it shows the general concept of machine learning quite well.
+image classification, because I think it shows the general concept of machine learning quite well.
 As for the pictures I used, I chose pictures of three different kinds of mammals: 
 cats, orangutans and sloths. There's not really a reason behind that choice, other
 than me liking those animals a lot. So let's go through the project from the beginning.
 
-```{r setup}
+```{r setup, echo=FALSE}
 knitr::opts_knit$set(root.dir = 'ML1_Images')
 ```
 
-Before starting we have to load the packages necessary. We are using keras for the 
-machine learning components and EBImage to read the images. 
+Before starting we have to set a working directory, set a seed andload the packages necessary. We are using keras for the 
+machine learning components and EBImage to read the images. We set a seed to make
+the model reproducible.
 
 ```{r, message=FALSE}
+#for reproducability
+set.seed(123)
+
 #loading packages
 if(!require(keras)){
     install.packages("keras")
@@ -165,9 +169,12 @@ Now we completed the data-wrangling and can create the actual model.
 ```{r}
 model <- keras_model_sequential()
 model %>%
-  layer_dense(units = 256, activation = "relu", input_shape = c(6912)) %>%
-  layer_dense(units = 128, activation = "relu") %>%
-  layer_dense(units = 3, activation = "softmax")
+  layer_dense(units = 256, activation = "relu", input_shape = c(6912), 
+              kernel_initializer = initializer_random_uniform(minval = -0.05, maxval = 0.05, seed = 123)) %>%
+  layer_dense(units = 128, activation = "relu", 
+              kernel_initializer = initializer_random_uniform(minval = -0.05, maxval = 0.05, seed = 123)) %>%
+  layer_dense(units = 3, activation = "softmax",
+              kernel_initializer = initializer_random_uniform(minval = -0.05, maxval = 0.05, seed = 123))
 ```
 
 We're using three hidden layers for our model. The pipe-operator %>% is used to pass our lines
@@ -178,7 +185,7 @@ always be changed to see what kind of impact it has.
 
 As for the activation function, we're using the most popular one:
 the rectified linear activation function (short="relu"). If you want to learn more
-about the relu function, click [here](https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/#:~:text=The%20rectified%20linear%20activation%20function,otherwise%2C%20it%20will%20output%20zero.&text=The%20rectified%20linear%20activation%20is,Perceptron%20and%20convolutional%20neural%20networks.){target="_blank"}
+about the relu function, click [here](https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/#:~:text=The%20rectified%20linear%20activation%20function,otherwise%2C%20it%20will%20output%20zero.&text=The%20rectified%20linear%20activation%20is,Perceptron%20and%20convolutional%20neural%20networks.){target="_blank"}.
 
 The value 6912 for the input_shape() command is related to our data.
 Earlier we resized and reshaped it to 48x48x3 --> 48 * 48 * 3 = 6912.
@@ -247,16 +254,17 @@ cbind(probability, Predicted = prediction, Actual=trainy)
 ```
 
 As you can see, the model's accuracy is ~80%. 
-It recognized 19 of the 24 images correctly. 
-All the false regonitions are sloths.
+It classified 19 of the 24 images correctly. 
+All the false classifications are sloths.
 
 So what could be the reason for this?
 
 Maybe the images are too similar, or the parameters could be tuned better.
 80% accuracy, while decent, is also not good enough and could be improved upon,
 either by using more data or by tuning the parameters differently.
+But for now I'm fine with it because as I said it's my first attempt at it. 
 
-Thanks for reading my first *real* blog post! I hope you enjoyed it and/or learned
+Thanks for reading my first **real** blog post! I hope you enjoyed it and/or learned
 something useful!
 
 Don't forget to check out my GitHub, where I will update the R-code for this project ,
