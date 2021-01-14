@@ -8,7 +8,7 @@ categories:
   - ML
 tags:
   - machine learning
-  - image recognition
+  - image classification
 ---
 
 # Intro

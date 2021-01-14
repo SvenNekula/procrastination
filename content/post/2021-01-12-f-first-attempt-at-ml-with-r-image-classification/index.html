@@ -1,5 +1,5 @@
 ---
-title: '[F] First attempt at ML with R: Image recognition'
+title: '[F] First attempt at ML with R: Image classification'
 author: Sven
 date: '2021-01-12'
 slug: []
@@ -8,7 +8,7 @@ categories:
   - ML
 tags:
   - machine learning
-  - image recognition
+  - image classification
 ---
 
 
@@ -17,19 +17,22 @@ tags:
 <h1>Intro</h1>
 <p>Hello again. Unfortunately it took longer than I had anticipated to create another
 post. I’ve spent a lot of time lately trying to set up Ubuntu on my desktop PC to use
-features like GPU-accelerated tensorflow etc.</p>
+as my main coding/data-science machine in the future.</p>
 </div>
 <div id="the-project" class="section level1">
 <h1>The project</h1>
 <p>I chose image recognition as my first project utilizing machine learning. I chose
-image recognition, because I think it shows the general concept of machine learning quite well.
+image classification, because I think it shows the general concept of machine learning quite well.
 As for the pictures I used, I chose pictures of three different kinds of mammals:
 cats, orangutans and sloths. There’s not really a reason behind that choice, other
 than me liking those animals a lot. So let’s go through the project from the beginning.</p>
-<pre class="r"><code>knitr::opts_knit$set(root.dir = &#39;ML1_Images&#39;)</code></pre>
-<p>Before starting we have to load the packages necessary. We are using keras for the
-machine learning components and EBImage to read the images.</p>
-<pre class="r"><code>#loading packages
+<p>Before starting we have to set a working directory, set a seed andload the packages necessary. We are using keras for the
+machine learning components and EBImage to read the images. We set a seed to make
+the model reproducible.</p>
+<pre class="r"><code>#for reproducability
+set.seed(123)
+
+#loading packages
 if(!require(keras)){
     install.packages(&quot;keras&quot;)
     library(keras)
@@ -172,16 +175,19 @@ them into class matrices using the to_categorical() command.</p>
 <p>Now we completed the data-wrangling and can create the actual model.</p>
 <pre class="r"><code>model &lt;- keras_model_sequential()
 model %&gt;%
-  layer_dense(units = 256, activation = &quot;relu&quot;, input_shape = c(6912)) %&gt;%
-  layer_dense(units = 128, activation = &quot;relu&quot;) %&gt;%
-  layer_dense(units = 3, activation = &quot;softmax&quot;)</code></pre>
+  layer_dense(units = 256, activation = &quot;relu&quot;, input_shape = c(6912), 
+              kernel_initializer = initializer_random_uniform(minval = -0.05, maxval = 0.05, seed = 123)) %&gt;%
+  layer_dense(units = 128, activation = &quot;relu&quot;, 
+              kernel_initializer = initializer_random_uniform(minval = -0.05, maxval = 0.05, seed = 123)) %&gt;%
+  layer_dense(units = 3, activation = &quot;softmax&quot;,
+              kernel_initializer = initializer_random_uniform(minval = -0.05, maxval = 0.05, seed = 123))</code></pre>
 <p>We’re using three hidden layers for our model. The pipe-operator %&gt;% is used to pass our lines
 onto the next ones.</p>
 <p>In the first hidden layer where using 256 neurons (=units). This number could
 always be changed to see what kind of impact it has.</p>
 <p>As for the activation function, we’re using the most popular one:
 the rectified linear activation function (short=“relu”). If you want to learn more
-about the relu function, click <a href="https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/#:~:text=The%20rectified%20linear%20activation%20function,otherwise%2C%20it%20will%20output%20zero.&amp;text=The%20rectified%20linear%20activation%20is,Perceptron%20and%20convolutional%20neural%20networks." target="_blank">here</a></p>
+about the relu function, click <a href="https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/#:~:text=The%20rectified%20linear%20activation%20function,otherwise%2C%20it%20will%20output%20zero.&amp;text=The%20rectified%20linear%20activation%20is,Perceptron%20and%20convolutional%20neural%20networks." target="_blank">here</a>.</p>
 <p>The value 6912 for the input_shape() command is related to our data.
 Earlier we resized and reshaped it to 48x48x3 –&gt; 48 * 48 * 3 = 6912.</p>
 <p>In the second hidden layer we’re using 128 neurons as it’s the half of 256. But once
@@ -235,40 +241,41 @@ you can see the accuraxy along the epochs. The training data is shown by the red
 the validation or testing data is shown by the blue line. Let’s look at more data to
 evaluate the model.</p>
 <pre><code>##      loss  accuracy 
-## 0.7455325 0.7916667</code></pre>
-<pre><code>##                                             Predicted Actual
-##  [1,] 0.9781156182 0.007060875 0.0148235224         0      0
-##  [2,] 0.9841300249 0.003862419 0.0120075792         0      0
-##  [3,] 0.9915374517 0.005872046 0.0025904581         0      0
-##  [4,] 0.9905920625 0.005317494 0.0040904400         0      0
-##  [5,] 0.8950932622 0.080638334 0.0242684186         0      0
-##  [6,] 0.9718229771 0.009160051 0.0190169867         0      0
-##  [7,] 0.9196797609 0.016752796 0.0635674745         0      0
-##  [8,] 0.7736937404 0.197635815 0.0286704097         0      0
-##  [9,] 0.1137151867 0.868834436 0.0174503215         1      1
-## [10,] 0.0017385932 0.996764302 0.0014970432         1      1
-## [11,] 0.0838277042 0.880229771 0.0359425582         1      1
-## [12,] 0.0007054033 0.998795867 0.0004987679         1      1
-## [13,] 0.0058028395 0.992544830 0.0016522972         1      1
-## [14,] 0.0032811309 0.995853186 0.0008656855         1      1
-## [15,] 0.0608024150 0.936793149 0.0024044800         1      1
-## [16,] 0.0273629166 0.968051672 0.0045854622         1      1
-## [17,] 0.0396098979 0.003549366 0.9568406940         2      2
-## [18,] 0.1045625582 0.031214055 0.8642234206         2      2
-## [19,] 0.0512943268 0.007607549 0.9410981536         2      2
-## [20,] 0.4425988793 0.552411139 0.0049899472         1      2
-## [21,] 0.3492200077 0.527367651 0.1234124005         1      2
-## [22,] 0.0966395438 0.886955976 0.0164044611         1      2
-## [23,] 0.1814621538 0.622746944 0.1957908720         1      2
-## [24,] 0.2871125042 0.685309947 0.0275776573         1      2</code></pre>
+## 0.7564980 0.7916667</code></pre>
+<pre><code>##                                          Predicted Actual
+##  [1,] 0.95264316 0.034181334 0.013175430         0      0
+##  [2,] 0.96668118 0.022272339 0.011046427         0      0
+##  [3,] 0.96781868 0.030258248 0.001922989         0      0
+##  [4,] 0.96893513 0.027278388 0.003786491         0      0
+##  [5,] 0.83501190 0.148390263 0.016597925         0      0
+##  [6,] 0.94117075 0.040156901 0.018672371         0      0
+##  [7,] 0.91319525 0.047351915 0.039452862         0      0
+##  [8,] 0.80336016 0.180319488 0.016320396         0      0
+##  [9,] 0.18889128 0.790573299 0.020535441         1      1
+## [10,] 0.03574866 0.956605434 0.007645905         1      1
+## [11,] 0.15161437 0.814992189 0.033393428         1      1
+## [12,] 0.02012695 0.977304459 0.002568562         1      1
+## [13,] 0.03865036 0.956534445 0.004815214         1      1
+## [14,] 0.02881572 0.968460143 0.002724155         1      1
+## [15,] 0.09281836 0.904531121 0.002650551         1      1
+## [16,] 0.07686366 0.915316761 0.007819601         1      1
+## [17,] 0.04336425 0.010721850 0.945913970         2      2
+## [18,] 0.06917103 0.029091591 0.901737392         2      2
+## [19,] 0.03184141 0.009796842 0.958361685         2      2
+## [20,] 0.45183608 0.541873217 0.006290700         1      2
+## [21,] 0.42685071 0.453500450 0.119648889         1      2
+## [22,] 0.16624881 0.816148698 0.017602578         1      2
+## [23,] 0.28890106 0.507815063 0.203283891         1      2
+## [24,] 0.34548962 0.628779829 0.025730556         1      2</code></pre>
 <p>As you can see, the model’s accuracy is ~80%.
-It recognized 19 of the 24 images correctly.
-All the false regonitions are sloths.</p>
+It classified 19 of the 24 images correctly.
+All the false classifications are sloths.</p>
 <p>So what could be the reason for this?</p>
 <p>Maybe the images are too similar, or the parameters could be tuned better.
 80% accuracy, while decent, is also not good enough and could be improved upon,
-either by using more data or by tuning the parameters differently.</p>
-<p>Thanks for reading my first <em>real</em> blog post! I hope you enjoyed it and/or learned
+either by using more data or by tuning the parameters differently.
+But for now I’m fine with it because as I said it’s my first attempt at it.</p>
+<p>Thanks for reading my first <strong>real</strong> blog post! I hope you enjoyed it and/or learned
 something useful!</p>
 <p>Don’t forget to check out my GitHub, where I will update the R-code for this project ,
 and follow me on twitter!</p>
