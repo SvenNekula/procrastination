@@ -56,7 +56,7 @@ for (i in 1:30){
 <p>We have 30 images in total: 10 cat pictures, 10 orangutan pictures and 10 sloth pictures.</p>
 <p>Let’s get an overview of the data. For example, we’re going to use the first picture
 that looks like this.</p>
-<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>As you can see the first image contains a cat.</p>
 <pre><code>## Image 
 ##   colorMode    : Color 
@@ -76,7 +76,7 @@ that looks like this.</p>
 ##  0.0000  0.3804  0.5529  0.5434  0.7098  1.0000</code></pre>
 <p>R transformed the image into a data-matrix containing the pixels. The images can also
 be plotted using a histogram.</p>
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>The histogram has three colors for a reason. The images are made up of three different
 kinds of pixels. Red pixels, green pixels and blue pixels (RGB). At the moment all
 of our images have different sizes as you can see in the following output.</p>
@@ -145,7 +145,7 @@ for (i in 1:8){
   trainx &lt;- rbind(trainx, mypictures[[i]])
 }
 
-#orangutang pictures
+#orangutan pictures
 for (i in 11:18){
   trainx &lt;- rbind(trainx, mypictures[[i]])
 }
@@ -235,38 +235,38 @@ mini-batch gradient descent. 20% of the data will be used for validation, 80% fo
 This is tuned by the validiation_split parameter.</p>
 <p>Let’s plot the model to get a better overview.</p>
 <pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 <p>In the upper plot you can see the loss of data along the epochs, in the lower plot
 you can see the accuraxy along the epochs. The training data is shown by the red line,
 the validation or testing data is shown by the blue line. Let’s look at more data to
 evaluate the model.</p>
 <pre><code>##      loss  accuracy 
-## 0.7564980 0.7916667</code></pre>
+## 0.7564979 0.7916667</code></pre>
 <pre><code>##                                          Predicted Actual
-##  [1,] 0.95264316 0.034181334 0.013175430         0      0
-##  [2,] 0.96668118 0.022272339 0.011046427         0      0
-##  [3,] 0.96781868 0.030258248 0.001922989         0      0
-##  [4,] 0.96893513 0.027278388 0.003786491         0      0
-##  [5,] 0.83501190 0.148390263 0.016597925         0      0
-##  [6,] 0.94117075 0.040156901 0.018672371         0      0
-##  [7,] 0.91319525 0.047351915 0.039452862         0      0
-##  [8,] 0.80336016 0.180319488 0.016320396         0      0
-##  [9,] 0.18889128 0.790573299 0.020535441         1      1
-## [10,] 0.03574866 0.956605434 0.007645905         1      1
-## [11,] 0.15161437 0.814992189 0.033393428         1      1
-## [12,] 0.02012695 0.977304459 0.002568562         1      1
-## [13,] 0.03865036 0.956534445 0.004815214         1      1
-## [14,] 0.02881572 0.968460143 0.002724155         1      1
-## [15,] 0.09281836 0.904531121 0.002650551         1      1
-## [16,] 0.07686366 0.915316761 0.007819601         1      1
-## [17,] 0.04336425 0.010721850 0.945913970         2      2
-## [18,] 0.06917103 0.029091591 0.901737392         2      2
-## [19,] 0.03184141 0.009796842 0.958361685         2      2
-## [20,] 0.45183608 0.541873217 0.006290700         1      2
-## [21,] 0.42685071 0.453500450 0.119648889         1      2
-## [22,] 0.16624881 0.816148698 0.017602578         1      2
-## [23,] 0.28890106 0.507815063 0.203283891         1      2
-## [24,] 0.34548962 0.628779829 0.025730556         1      2</code></pre>
+##  [1,] 0.95264328 0.034181308 0.013175433         0      0
+##  [2,] 0.96668130 0.022272330 0.011046428         0      0
+##  [3,] 0.96781880 0.030258229 0.001922988         0      0
+##  [4,] 0.96893513 0.027278375 0.003786493         0      0
+##  [5,] 0.83501196 0.148390129 0.016597919         0      0
+##  [6,] 0.94117075 0.040156875 0.018672366         0      0
+##  [7,] 0.91319525 0.047351845 0.039452825         0      0
+##  [8,] 0.80336028 0.180319324 0.016320406         0      0
+##  [9,] 0.18889140 0.790573120 0.020535437         1      1
+## [10,] 0.03574865 0.956605434 0.007645905         1      1
+## [11,] 0.15161444 0.814992130 0.033393443         1      1
+## [12,] 0.02012695 0.977304459 0.002568563         1      1
+## [13,] 0.03865035 0.956534564 0.004815212         1      1
+## [14,] 0.02881574 0.968460143 0.002724156         1      1
+## [15,] 0.09281841 0.904531121 0.002650548         1      1
+## [16,] 0.07686374 0.915316761 0.007819604         1      1
+## [17,] 0.04336422 0.010721830 0.945913970         2      2
+## [18,] 0.06917100 0.029091557 0.901737392         2      2
+## [19,] 0.03184139 0.009796824 0.958361804         2      2
+## [20,] 0.45183629 0.541873038 0.006290701         1      2
+## [21,] 0.42685083 0.453500241 0.119648889         1      2
+## [22,] 0.16624892 0.816148520 0.017602587         1      2
+## [23,] 0.28890112 0.507814884 0.203283921         1      2
+## [24,] 0.34548971 0.628779709 0.025730571         1      2</code></pre>
 <p>As you can see, the model’s accuracy is ~80%.
 It classified 19 of the 24 images correctly.
 All the false classifications are sloths.</p>
@@ -277,7 +277,7 @@ either by using more data or by tuning the parameters differently.
 But for now I’m fine with it because as I said it’s my first attempt at it.</p>
 <p>Thanks for reading my first <strong>real</strong> blog post! I hope you enjoyed it and/or learned
 something useful!</p>
-<p>Don’t forget to check out my GitHub, where I will update the R-code for this project ,
+<p>Don’t forget to check out my GitHub, where I will update the <a href="https://github.com/SvenNekula/mammal-recognition.git" target="_blank">R-code</a> for this project ,
 and follow me on twitter!</p>
 <p>See you next time! -SN</p>
 </div>
