@@ -129,7 +129,7 @@ for (i in 1:8){
   trainx <- rbind(trainx, mypictures[[i]])
 }
 
-#orangutang pictures
+#orangutan pictures
 for (i in 11:18){
   trainx <- rbind(trainx, mypictures[[i]])
 }
@@ -267,7 +267,7 @@ But for now I'm fine with it because as I said it's my first attempt at it.
 Thanks for reading my first **real** blog post! I hope you enjoyed it and/or learned
 something useful!
 
-Don't forget to check out my GitHub, where I will update the R-code for this project ,
+Don't forget to check out my GitHub, where I will update the [R-code](https://github.com/SvenNekula/mammal-recognition){target="_blank"} for this project ,
 and follow me on twitter!
 
 See you next time! -SN
