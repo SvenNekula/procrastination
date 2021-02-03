@@ -10,3 +10,51 @@ tags:
   - Data Analysis
 ---
 
+# Intro
+
+Hello again. Unfortunately exams are coming up very soon, which is why I was
+so inactive lately. I was working on a project the entire time, but couldn't 
+put as much effort in as I wanted to. But I will still post it anyway, because
+it has been too long since my last post. 
+
+# The project
+
+On of the problems of today's data driven world is, that the data constantly 
+gets updated. So how can you assure, that you're using the most up-to-date data?
+That's where APIs come into play. I'm not going to explain what an API is and how
+it works, because I want to keep this post as short as possible and focus on working 
+with APIs in R, but if you're interested in learning more about APIs, you can follow this
+[link](https://en.wikipedia.org/wiki/API){target="_blank"} to learn more about the topic.
+
+I used [this](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0){target="_blank"} as my data source, as Covid-19 is (unfortunately) a 
+relevant topic at the moment. Before starting, we have to start as usual: By loading 
+packages.
+
+```{r}
+#Loading packages
+library(httr)
+library(jsonlite)
+```
+
+These two packages are necessary to access web data in the JSON-format. 
+
+```{r}
+#API request
+dt <- GET("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json")
+dt
+```
+
+In this step we're requesting the data from the API using the GET() function,
+which is in the httr package. Then we can analyze the GET() output.
+As you can see, the "Status:" shows the number 200, which is what we want to see,
+as it corresponds to a successful attempt at getting the data. 
+
+# THIS POST IS A WORK IN PROGRESS!!!
+
+
+
+
+
+
+
+
