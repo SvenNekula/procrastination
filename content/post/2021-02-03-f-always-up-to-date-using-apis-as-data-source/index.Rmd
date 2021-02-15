@@ -1,0 +1,152 @@
+---
+title: '[F] Always up to date: Using APIs as data source'
+author: Sven
+date: '2021-02-15'
+categories:
+  - R
+tags:
+  - API
+  - Data Analysis
+---
+
+# Intro
+
+Hello again. Unfortunately exams are coming up very soon, which is why I was
+so inactive lately. I was working on a project the entire time, but couldn't 
+put as much effort in as I wanted to. But I will still post it anyway, because
+it has been too long since my last post.
+
+# The project
+
+On of the problems of today's data driven world is, that the data constantly 
+gets updated. So how can you assure, that you're using the most up-to-date data?
+That's where APIs come into play. I'm not going to explain what an API is and how
+it works, because I want to keep this post as short as possible and focus on working 
+with APIs in R, but if you're interested in learning more about APIs, you can follow this
+[link](https://en.wikipedia.org/wiki/API){target="_blank"} to learn more about the topic.
+
+I used [this](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0){target="_blank"} as my data source, as Covid-19 is (unfortunately) a 
+relevant topic at the moment. Before starting, we have to start as usual: By loading 
+packages.
+
+```{r}
+#Loading packages
+library(httr)
+library(jsonlite)
+```
+
+These two packages are necessary to access web data in the JSON-format. 
+
+```{r}
+#API request
+dt <- GET("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/Coronaf%C3%A4lle_in_den_Bundesl%C3%A4ndern/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json")
+dt
+```
+
+In this step we're requesting the data from the API using the GET() function,
+which is in the httr package. Then we can analyze the GET() output.
+As you can see, the "Status:" shows the number 200, which is what we want to see,
+as it corresponds to a successful attempt at getting the data. 
+
+In the next step we have to convert the data into the JSON-structure using the 
+rawToChar() command from the jsonlite package.
+
+```{r}
+datCov <- fromJSON(rawToChar(dt$content))
+names(datCov)
+```
+
+After converting the data to the JSON structure we can further explore our data.
+This might take some trial and error, as I encountered some freezes when I 
+tried to access the "wrong" data (i.e. not the actual data we're looking for).
+So to reduce the risk of the site not deploying I will skip the detailed exploration
+of the JSON data.
+
+So the data we want is saved in "features" of our datCov object and again has multiple
+types of data and information. To further extract the data we want we convert the 
+"features" part to a list and finally convert our data into a data frame.
+
+```{r}
+listCov19 <- datCov$features
+dfCov19 <- as.data.frame(listCov19[[1]])
+```
+
+Now we can also take our first look at the actual data we want to work with.
+
+```{r}
+dim(dfCov19)
+head(dfCov19)
+sapply(dfCov19, class)
+```
+
+The data frame has 18 columns and 16 rows and contains various data about 
+Covid-19 in Germany. 
+
+From here you can do whatever you want with the data. Use it for analysis or create
+plots like those two!
+
+```{r, echo=FALSE}
+dfc <- dfCov19
+dfc$LAN_ew_GEN <- c("SH", "HH", "NI", "HB", "NW", "HE", "RP", "BW",
+                    "BY", "SL","BE", "BB", "MV", "SN", "ST", "TH")
+
+library(ggplot2)
+library(cowplot)
+
+cp100k <- ggplot(dfc, aes(reorder(LAN_ew_GEN, -cases7_bl_per_100k), 
+                     cases7_bl_per_100k)) + geom_bar(stat="identity") + 
+  ggtitle("Covid-19 in Germany") + xlab("State (short)") +
+  ylab("new cases per 100.000 inhabitants (7 days)")
+
+human_numbers <- function(x = NULL, smbl ="", signif = 1){
+  humanity <- function(y){
+    
+    if (!is.na(y)){
+      tn <- round(abs(y) / 1e12, signif)
+      b <- round(abs(y) / 1e9, signif)
+      m <- round(abs(y) / 1e6, signif)
+      k <- round(abs(y) / 1e3, signif)
+      
+      if ( y >= 0 ){
+        y_is_positive <- ""
+      } else {
+        y_is_positive <- "-"
+      }
+      
+      if ( k < 1 ) {
+        paste0( y_is_positive, smbl, round(abs(y), signif ))
+      } else if ( m < 1){
+        paste0 (y_is_positive, smbl,  k , "k")
+      } else if (b < 1){
+        paste0 (y_is_positive, smbl, m ,"m")
+      }else if(tn < 1){
+        paste0 (y_is_positive, smbl, b ,"bn")
+      } else {
+        paste0 (y_is_positive, smbl,  comma(tn), "tn")
+      }
+    } else if (is.na(y) | is.null(y)){
+      "-"
+    }
+  }
+  
+  sapply(x,humanity)
+}
+
+ct <- ggplot(dfc, aes(reorder(LAN_ew_GEN, -Fallzahl), 
+                     Fallzahl)) + geom_bar(stat="identity") + 
+  ggtitle("") + xlab("State (short)") +
+  ylab("Total cases") +
+  scale_y_continuous(labels = human_numbers)
+
+plot_grid(cp100k, ct, labels="")
+```
+
+That's all there is for this blog post. Sorry again for not posting as much lately.
+University is more challenging at the moment than I had anticipated. 
+But soon all of my exams will be over and I promise I will post more!
+As always you can find the code for the project on my [GitHub](https://github.com/SvenNekula/Covid_API){target="_blank"}.
+Thank you for taking the time to read this post! 
+
+See you next time! -SN 
+
+
