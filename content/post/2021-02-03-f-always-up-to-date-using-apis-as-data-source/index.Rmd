@@ -141,9 +141,10 @@ ct <- ggplot(dfc, aes(reorder(LAN_ew_GEN, -Fallzahl),
 plot_grid(cp100k, ct, labels="")
 ```
 
-That's all there is for this blogpost. Sorry again for not posting as much lately.
+That's all there is for this blog post. Sorry again for not posting as much lately.
 University is more challenging at the moment than I had anticipated. 
 But soon all of my exams will be over and I promise I will post more!
+As always you can find the code for the project on my [GitHub](https://github.com/SvenNekula/Covid_API){target="_blank"}.
 Thank you for taking the time to read this post! 
 
 See you next time! -SN 
