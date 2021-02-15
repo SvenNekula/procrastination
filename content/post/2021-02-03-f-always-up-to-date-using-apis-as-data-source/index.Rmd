@@ -1,7 +1,7 @@
 ---
 title: '[F] Always up to date: Using APIs as data source'
 author: Sven
-date: '2021-02-03'
+date: '2021-02-15'
 slug: []
 categories:
   - R
@@ -49,12 +49,104 @@ which is in the httr package. Then we can analyze the GET() output.
 As you can see, the "Status:" shows the number 200, which is what we want to see,
 as it corresponds to a successful attempt at getting the data. 
 
-# THIS POST IS A WORK IN PROGRESS!!!
+In the next step we have to convert the data into the JSON-structure using the 
+rawToChar() command from the jsonlite package.
 
+```{r}
+datCov <- fromJSON(rawToChar(dt$content))
+names(datCov)
+```
 
+After converting the data to the JSON structure we can further explore our data.
+This might take some trial and error, as I encountered some freezes when I 
+tried to access the "wrong" data (i.e. not the actual data we're looking for).
+So to reduce the risk of the site not deploying I will skip the detailed exploration
+of the JSON data.
 
+So the data we want is saved in "features" of our datCov object and again has multiple
+types of data and information. To further extract the data we want we convert the 
+"features" part to a list and finally convert our data into a data frame.
 
+```{r}
+listCov19 <- datCov$features
+dfCov19 <- as.data.frame(listCov19[[1]])
+```
 
+Now we can also take our first look at the actual data we want to work with.
 
+```{r}
+dim(dfCov19)
+head(dfCov19)
+sapply(dfCov19, class)
+```
+
+The data frame has 18 columns and 16 rows and contains various data about 
+Covid-19 in Germany. 
+
+From here you can do whatever you want with the data. Use it for analysis or create
+plots like those two!
+
+```{r, echo=FALSE}
+dfc <- dfCov19
+dfc$LAN_ew_GEN <- c("SH", "HH", "NI", "HB", "NW", "HE", "RP", "BW",
+                    "BY", "SL","BE", "BB", "MV", "SN", "ST", "TH")
+
+library(ggplot2)
+library(cowplot)
+
+cp100k <- ggplot(dfc, aes(reorder(LAN_ew_GEN, -cases7_bl_per_100k), 
+                     cases7_bl_per_100k)) + geom_bar(stat="identity") + 
+  ggtitle("Covid-19 in Germany") + xlab("State (short)") +
+  ylab("new cases per 100.000 inhabitants (7 days)")
+
+human_numbers <- function(x = NULL, smbl ="", signif = 1){
+  humanity <- function(y){
+    
+    if (!is.na(y)){
+      tn <- round(abs(y) / 1e12, signif)
+      b <- round(abs(y) / 1e9, signif)
+      m <- round(abs(y) / 1e6, signif)
+      k <- round(abs(y) / 1e3, signif)
+      
+      if ( y >= 0 ){
+        y_is_positive <- ""
+      } else {
+        y_is_positive <- "-"
+      }
+      
+      if ( k < 1 ) {
+        paste0( y_is_positive, smbl, round(abs(y), signif ))
+      } else if ( m < 1){
+        paste0 (y_is_positive, smbl,  k , "k")
+      } else if (b < 1){
+        paste0 (y_is_positive, smbl, m ,"m")
+      }else if(tn < 1){
+        paste0 (y_is_positive, smbl, b ,"bn")
+      } else {
+        paste0 (y_is_positive, smbl,  comma(tn), "tn")
+      }
+    } else if (is.na(y) | is.null(y)){
+      "-"
+    }
+  }
+  
+  sapply(x,humanity)
+}
+
+ct <- ggplot(dfc, aes(reorder(LAN_ew_GEN, -Fallzahl), 
+                     Fallzahl)) + geom_bar(stat="identity") + 
+  ggtitle("") + xlab("State (short)") +
+  ylab("Total cases") +
+  scale_y_continuous(labels = human_numbers)
+
+plot_grid(cp100k, ct, labels="")
+```
+
+That's all there is for this blogpost. Sorry again for not posting as much lately.
+University is more challenging at the moment than I had anticipated. 
+But soon all of my exams will be over and I promise I will post more!
+Thank you for taking the time to read this post! 
+
+See you next time! -SN
 
 
