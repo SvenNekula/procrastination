@@ -2,7 +2,6 @@
 title: '[F] Always up to date: Using APIs as data source'
 author: Sven
 date: '2021-02-15'
-slug: []
 categories:
   - R
 tags:
@@ -15,7 +14,7 @@ tags:
 Hello again. Unfortunately exams are coming up very soon, which is why I was
 so inactive lately. I was working on a project the entire time, but couldn't 
 put as much effort in as I wanted to. But I will still post it anyway, because
-it has been too long since my last post. 
+it has been too long since my last post.
 
 # The project
 
@@ -147,6 +146,6 @@ University is more challenging at the moment than I had anticipated.
 But soon all of my exams will be over and I promise I will post more!
 Thank you for taking the time to read this post! 
 
-See you next time! -SN
+See you next time! -SN 
 
 
