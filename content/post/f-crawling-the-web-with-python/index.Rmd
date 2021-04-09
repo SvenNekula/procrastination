@@ -1,0 +1,278 @@
+---
+title: '[F] Crawling the web with Python'
+author: 'Sven '
+date: '2021-04-08'
+slug: []
+categories:
+  - Python
+tags:
+  - webcrawler
+---
+
+Hello again! Unfortunately I caught the corona virus a few weeks back and thus 
+had to stay in quarantine for ~2 weeks. Quarantine sucks, but at least I used 
+the time to get my python skills back up to par. 
+
+# The project
+
+I wanted to create a webcrawler using python. Being a fun project, I used a website with data from all the pokemon to crawl the data and write it to a csv file. 
+During the process I found two ways to do so.
+The first way required more code than the second one. But I will show you both.
+
+# V1 
+
+As usual we have to load the modules first.
+
+```{python, eval=FALSE}
+import requests
+from bs4 import BeautifulSoup
+```
+
+Next up we have to set the url and use the request package to make a http request.
+
+```{python, eval=FALSE}
+url = 'https://pokemondb.net/pokedex/all'
+r = requests.get(url)
+```
+
+You can check if the request was successfull by printing the status code using
+the command print(r.status_code). If the status-code is 200 you're good. After 
+creating the request and checking if it was successfull we have to use the 
+'BeautifulSoup' module to parse the website's html file. 
+
+```{python, eval=FALSE}
+soup = BeautifulSoup(r.text, 'html.parser')
+```
+
+After parsing the html file we can start to look for the data. In our case the 
+data is in a html-table, which we can find using the .find command.
+
+```{python, eval=FALSE}
+pokemon_table = soup.find('table', class_ = 'data-table block-wide')
+```
+
+Now that we found the html-table we can make a list using a for loop. The 
+columns of the table have different classes however, which we can find by 
+inspecting the website using our web-browser. There were 3 different classes:
+'cell-name', 'cell-total' and 'cell-num'. There were 7 different elements of the 
+'cell-num'-class, so we had to further inspect those elements, to get the right ones.
+Having done that, we can create the list. 
+
+```{python, eval=FALSE}
+pokemon_list = []
+for pkmn in pokemon_table.find_all('tbody'):
+    rows = pkmn.find_all('tr')
+    for row in rows:
+        p_name = row.find('td', class_ = 'cell-name').text
+        p_total = row.find('td', class_ = 'cell-total').text
+        p_hp = row.find_all('td', class_ = 'cell-num')[1].text
+        p_att = row.find_all('td', class_ = 'cell-num')[2].text
+        p_def = row.find_all('td', class_ = 'cell-num')[3].text
+        p_spatk = row.find_all('td', class_ = 'cell-num')[4].text
+        p_spdef = row.find_all('td', class_ = 'cell-num')[5].text
+        p_speed = row.find_all('td', class_ = 'cell-num')[6].text
+        pokemon_list.append([p_name, p_total, p_hp, p_att, p_def, p_spatk, p_spdef, p_speed])
+```
+
+The last step is to convert this list into a csv-file. We can do this with the help
+of the csv module.
+
+```{python, eval=FALSE}
+import csv
+with open('allpokemon.csv', 'w', newline='') as csvfile:
+    pkmnwriter = csv.writer(csvfile, delimiter=';',
+                            quotechar='""', quoting=csv.QUOTE_MINIMAL)
+    
+    for row in pokemon_list:
+        pkmnwriter.writerow
+```
+
+Now we successfully transformed the website's data into a csv-file!
+
+# V2
+
+The second way of transforming the website's data into a csv is a lot easier.
+It only requires 4 lines of code, because we're using pandas' read_html function.
+This function automatically scans the website for html-tables and converts them to 
+a list. One thing to keep in mind is to use the requests module the same way we used 
+it in V1, otherwise you might encounter some errors!
+
+```{python, eval=FALSE}
+import pandas as pd
+
+pkmn_list = pd.read_html(r.text)
+df = pd.DataFrame(pkmn_list[0])
+
+df.to_csv (r'P:\\GitHub\\webcrawler\\pokemon_list.csv', index = False, header=True)
+```
+
+Those were 2 ways to crawl data from a website. Now we can further use the data
+and analyze it. 
+
+# Analyzing the data
+
+Before analyzing the data I opened the csv file in excel and transformed it to 
+a .xslx file, because it makes it easier to work with (in excel).
+To load the .xslx file into RStudio I used the 'readxl' package. I also used 
+'dplyr' and 'ggplot2' to filter and visualize the data. 
+
+```{r, echo=FALSE, warning=FALSE}
+#loading packages
+library(readxl)
+library(dplyr)
+library(ggplot2)
+
+#loading data
+pData <- read_excel("P:\\GitHub\\webcrawler\\pokemon_list.xlsx")
+```
+
+Now we can get an overview of the data.
+
+```{r}
+#overview of data
+str(pData)
+```
+
+As you can see the data is the 'tibble'-format. I wanted to change that and turn 
+the data into a dataframe. To do that I used the as.data.frame function.
+
+```{r}
+#converting tibble into df
+dfp <- as.data.frame(pData)
+str(dfp)
+```
+
+If you have knowledge of Pokemon, you probably know that Eternamax is the strongest
+Pokemon. However it's just used in an NPC fight and can't be used by the player,
+which is why it has to be removed from the dataset, because it's an extreme outlier.
+This can be done multiple ways, I just chose to use the subset function, as I've 
+never used it. 
+
+```{r}
+#removing Eternamax
+max(dfp$Total)
+pokemon_data <- subset(dfp, dfp$Total<1125)
+```
+
+After finalizing the dataframe I wanted to work with, I wrote a function called
+'quickAnalysis'. Pokemon have different stats, for example attack or defense.
+This function returns a list with the mean, median, max and min of a stat. 
+The function takes 2 arguments: x, i.e. the column of the dataframe and col, i.e.
+the perticular column. I chose to do it this way, so that the function can also return
+the name of the stat.
+
+```{r}
+quickAnalysis <- function(x, col){
+  v_mean <- mean(x)
+  v_median <- median(x)
+  v_max <- max(x)
+  v_min <- min(x)
+  ql <- list(v_mean, v_median, v_max, v_min)
+  names(ql) <- c(paste("Mean of", names(dfp)[col], "Stat"), 
+                 paste("Median of", names(dfp)[col], "Stat"), 
+                 paste("Max of", names(dfp)[col], "Stat"),
+                 paste("Min of", names(dfp)[col], "Stat"))
+  return(ql)
+}
+```
+
+We can plug in the different stats into the function now. 
+
+```{r}
+#total
+quickAnalysis(pokemon_data[,4], 4)
+#hp
+quickAnalysis(pokemon_data[,5], 5)
+#att
+quickAnalysis(pokemon_data[,6], 6)
+#def
+quickAnalysis(pokemon_data[,7], 7)
+#spatk
+quickAnalysis(pokemon_data[,8], 8)
+#spdef
+quickAnalysis(pokemon_data[,9], 9)
+#speed
+quickAnalysis(pokemon_data[,10], 10)
+```
+
+As you can see the max total stat of any Pokemon is 780, while the min is 175.
+That's quite a big margin. To visualize the distribution of the Pokemon totals we can
+use a histogram. 
+
+```{r}
+#plotting data:
+ht <- ggplot(pokemon_data, aes(x=Total)) + geom_histogram(binwidth = 10, color="black", fill="white") +
+  scale_x_continuous(breaks = seq(0, 1150, 50)) +
+  geom_vline(xintercept = mean(pokemon_data$Total), col="blue", linetype = "dashed", size = 1) +
+  geom_density(fill="red", alpha=.2, aes(y=10 * ..count..,))
+
+ht
+```
+
+Here we can see the mean of the total stat, which is ~440. We can also see that 
+the most common total base stats are between 480 and 500. 
+
+
+But what are the best and the worst Pokemon? To find this out we can combine 
+our quickAnalysis function with dplyr's filter function.
+
+```{r}
+best_pkmn <- pokemon_data %>%
+  filter(Total==unlist(quickAnalysis(pokemon_data[,4], 4)[3]))
+best_pkmn[,2:4]
+```
+
+The best Pokemon are the mega evolutions of Mewtwo and Rayquaza with a base stat total of 780.
+
+```{r}
+worst_pkmn <- pokemon_data %>%
+  filter(Total==unlist(quickAnalysis(pokemon_data[,4], 4)[4]))
+worst_pkmn[,2:4]
+```
+
+And the worst Pokemon is Wishiwashi's solo form with a base stat total of 175.
+
+
+I also wanted to make a boxplot showing the different stats. To do that we had 
+to reshape our dataframe from a wide-format to a long-format. 
+
+```{r}
+#reshaping data to plot
+plotDF <- data.frame(type=c(rep(names(pokemon_data)[5], 1044), 
+                            rep(names(pokemon_data)[6], 1044),
+                            rep(names(pokemon_data)[7], 1044),
+                            rep(names(pokemon_data)[8], 1044),
+                            rep(names(pokemon_data)[9], 1044),
+                            rep(names(pokemon_data)[10], 1044)),
+                     value=c(pokemon_data[,5],
+                             pokemon_data[,6],
+                             pokemon_data[,7],
+                             pokemon_data[,8],
+                             pokemon_data[,9],
+                             pokemon_data[,10]))
+
+head(plotDF)
+```
+
+Now we are able to create a boxplot.
+
+```{r}
+d_stats <- ggplot(plotDF, aes(x=value, y=type, color=type)) +
+  geom_boxplot()
+d_stats
+```
+
+We can see again that the attack stat has the highest median. 
+It's also visible that the HP stat has a lot of outliers. 
+
+
+As always you can find the code for the [crawler](https://github.com/SvenNekula/webcrawler){target="_blank"} and the 
+[analysis](https://github.com/SvenNekula/CrawlerAnalysis){target="_blank"} on 
+my GitHub.
+That's it for this post. Thanks for reading, see you again next time!
+
+-SN 
+
+
+
+
