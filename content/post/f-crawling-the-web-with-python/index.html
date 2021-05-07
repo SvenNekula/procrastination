@@ -88,15 +88,7 @@ and analyze it.</p>
 <p>Before analyzing the data I opened the csv file in excel and transformed it to
 a .xslx file, because it makes it easier to work with (in excel).
 To load the .xslx file into RStudio I used the ‘readxl’ package. I also used
-‘dplyr’ and ‘ggplot2’ to filter and visualize the data.</p>
-<pre><code>## 
-## Attache Paket: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
+‘dplyr’ and ‘ggplot2’ from the tidyverse package to filter and visualize the data.</p>
 <p>Now we can get an overview of the data.</p>
 <pre class="r"><code>#overview of data
 str(pData)</code></pre>
@@ -111,199 +103,85 @@ str(pData)</code></pre>
 ##  $ Sp. Atk: num [1:1045] 65 80 100 122 60 80 109 130 159 50 ...
 ##  $ Sp. Def: num [1:1045] 65 80 100 120 50 65 85 85 115 64 ...
 ##  $ Speed  : num [1:1045] 45 60 80 80 65 80 100 100 100 43 ...</code></pre>
-<p>As you can see the data is the ‘tibble’-format. I wanted to change that and turn
-the data into a dataframe. To do that I used the as.data.frame function.</p>
-<pre class="r"><code>#converting tibble into df
-dfp &lt;- as.data.frame(pData)
-str(dfp)</code></pre>
-<pre><code>## &#39;data.frame&#39;:    1045 obs. of  10 variables:
-##  $ #      : num  1 2 3 3 4 5 6 6 6 7 ...
-##  $ Name   : chr  &quot;Bulbasaur&quot; &quot;Ivysaur&quot; &quot;Venusaur&quot; &quot;Venusaur Mega Venusaur&quot; ...
-##  $ Type   : chr  &quot;Grass Poison&quot; &quot;Grass Poison&quot; &quot;Grass Poison&quot; &quot;Grass Poison&quot; ...
-##  $ Total  : num  318 405 525 625 309 405 534 634 634 314 ...
-##  $ HP     : num  45 60 80 80 39 58 78 78 78 44 ...
-##  $ Attack : num  49 62 82 100 52 64 84 130 104 48 ...
-##  $ Defense: num  49 63 83 123 43 58 78 111 78 65 ...
-##  $ Sp. Atk: num  65 80 100 122 60 80 109 130 159 50 ...
-##  $ Sp. Def: num  65 80 100 120 50 65 85 85 115 64 ...
-##  $ Speed  : num  45 60 80 80 65 80 100 100 100 43 ...</code></pre>
 <p>If you have knowledge of Pokemon, you probably know that Eternamax is the strongest
 Pokemon. However it’s just used in an NPC fight and can’t be used by the player,
 which is why it has to be removed from the dataset, because it’s an extreme outlier.
 This can be done multiple ways, I just chose to use the subset function, as I’ve
 never used it.</p>
 <pre class="r"><code>#removing Eternamax
-max(dfp$Total)</code></pre>
-<pre><code>## [1] 1125</code></pre>
-<pre class="r"><code>pokemon_data &lt;- subset(dfp, dfp$Total&lt;1125)</code></pre>
-<p>After finalizing the dataframe I wanted to work with, I wrote a function called
-‘quickAnalysis’. Pokemon have different stats, for example attack or defense.
-This function returns a list with the mean, median, max and min of a stat.
-The function takes 2 arguments: x, i.e. the column of the dataframe and col, i.e.
-the perticular column. I chose to do it this way, so that the function can also return
-the name of the stat.</p>
-<pre class="r"><code>quickAnalysis &lt;- function(x, col){
-  v_mean &lt;- mean(x)
-  v_median &lt;- median(x)
-  v_max &lt;- max(x)
-  v_min &lt;- min(x)
-  ql &lt;- list(v_mean, v_median, v_max, v_min)
-  names(ql) &lt;- c(paste(&quot;Mean of&quot;, names(dfp)[col], &quot;Stat&quot;), 
-                 paste(&quot;Median of&quot;, names(dfp)[col], &quot;Stat&quot;), 
-                 paste(&quot;Max of&quot;, names(dfp)[col], &quot;Stat&quot;),
-                 paste(&quot;Min of&quot;, names(dfp)[col], &quot;Stat&quot;))
-  return(ql)
-}</code></pre>
-<p>We can plug in the different stats into the function now.</p>
-<pre class="r"><code>#total
-quickAnalysis(pokemon_data[,4], 4)</code></pre>
-<pre><code>## $`Mean of Total Stat`
-## [1] 438.658
-## 
-## $`Median of Total Stat`
-## [1] 458
-## 
-## $`Max of Total Stat`
-## [1] 780
-## 
-## $`Min of Total Stat`
-## [1] 175</code></pre>
-<pre class="r"><code>#hp
-quickAnalysis(pokemon_data[,5], 5)</code></pre>
-<pre><code>## $`Mean of HP Stat`
-## [1] 69.8908
-## 
-## $`Median of HP Stat`
-## [1] 68
-## 
-## $`Max of HP Stat`
-## [1] 255
-## 
-## $`Min of HP Stat`
-## [1] 1</code></pre>
-<pre class="r"><code>#att
-quickAnalysis(pokemon_data[,6], 6)</code></pre>
-<pre><code>## $`Mean of Attack Stat`
-## [1] 80.43391
-## 
-## $`Median of Attack Stat`
-## [1] 77
-## 
-## $`Max of Attack Stat`
-## [1] 190
-## 
-## $`Min of Attack Stat`
-## [1] 5</code></pre>
-<pre class="r"><code>#def
-quickAnalysis(pokemon_data[,7], 7)</code></pre>
-<pre><code>## $`Mean of Defense Stat`
-## [1] 74.4933
-## 
-## $`Median of Defense Stat`
-## [1] 70
-## 
-## $`Max of Defense Stat`
-## [1] 230
-## 
-## $`Min of Defense Stat`
-## [1] 5</code></pre>
-<pre class="r"><code>#spatk
-quickAnalysis(pokemon_data[,8], 8)</code></pre>
-<pre><code>## $`Mean of Sp. Atk Stat`
-## [1] 72.97222
-## 
-## $`Median of Sp. Atk Stat`
-## [1] 65
-## 
-## $`Max of Sp. Atk Stat`
-## [1] 194
-## 
-## $`Min of Sp. Atk Stat`
-## [1] 10</code></pre>
-<pre class="r"><code>#spdef
-quickAnalysis(pokemon_data[,9], 9)</code></pre>
-<pre><code>## $`Mean of Sp. Def Stat`
-## [1] 72.11877
-## 
-## $`Median of Sp. Def Stat`
-## [1] 70
-## 
-## $`Max of Sp. Def Stat`
-## [1] 230
-## 
-## $`Min of Sp. Def Stat`
-## [1] 20</code></pre>
-<pre class="r"><code>#speed
-quickAnalysis(pokemon_data[,10], 10)</code></pre>
-<pre><code>## $`Mean of Speed Stat`
-## [1] 68.74904
-## 
-## $`Median of Speed Stat`
-## [1] 65
-## 
-## $`Max of Speed Stat`
-## [1] 200
-## 
-## $`Min of Speed Stat`
-## [1] 5</code></pre>
+pD &lt;- pData %&gt;% filter(Total&lt;1125)</code></pre>
+<p>After finalizing the dataframe I wanted to work with, I wanted to get a more
+detailled overview of the distributions of the stats. I used the summary command
+for all the stat columns to see the min, max, median and mean of my data.</p>
+<pre class="r"><code>pD %&gt;% select(4:10) %&gt;% summary()</code></pre>
+<pre><code>##      Total             HP             Attack          Defense      
+##  Min.   :175.0   Min.   :  1.00   Min.   :  5.00   Min.   :  5.00  
+##  1st Qu.:330.0   1st Qu.: 50.00   1st Qu.: 55.00   1st Qu.: 50.00  
+##  Median :458.0   Median : 68.00   Median : 77.00   Median : 70.00  
+##  Mean   :438.7   Mean   : 69.89   Mean   : 80.43   Mean   : 74.49  
+##  3rd Qu.:515.0   3rd Qu.: 82.00   3rd Qu.:100.00   3rd Qu.: 90.00  
+##  Max.   :780.0   Max.   :255.00   Max.   :190.00   Max.   :230.00  
+##     Sp. Atk          Sp. Def           Speed       
+##  Min.   : 10.00   Min.   : 20.00   Min.   :  5.00  
+##  1st Qu.: 50.00   1st Qu.: 50.00   1st Qu.: 45.00  
+##  Median : 65.00   Median : 70.00   Median : 65.00  
+##  Mean   : 72.97   Mean   : 72.12   Mean   : 68.75  
+##  3rd Qu.: 95.00   3rd Qu.: 90.00   3rd Qu.: 90.00  
+##  Max.   :194.00   Max.   :230.00   Max.   :200.00</code></pre>
 <p>As you can see the max total stat of any Pokemon is 780, while the min is 175.
 That’s quite a big margin. To visualize the distribution of the Pokemon totals we can
 use a histogram.</p>
 <pre class="r"><code>#plotting data:
-ht &lt;- ggplot(pokemon_data, aes(x=Total)) + geom_histogram(binwidth = 10, color=&quot;black&quot;, fill=&quot;white&quot;) +
+ggplot(pD, aes(x=Total)) + geom_histogram(binwidth = 10, color=&quot;black&quot;, fill=&quot;white&quot;) +
   scale_x_continuous(breaks = seq(0, 1150, 50)) +
-  geom_vline(xintercept = mean(pokemon_data$Total), col=&quot;blue&quot;, linetype = &quot;dashed&quot;, size = 1) +
-  geom_density(fill=&quot;red&quot;, alpha=.2, aes(y=10 * ..count..,))
-
-ht</code></pre>
-<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+  geom_vline(xintercept = mean(pD$Total), col=&quot;blue&quot;, linetype = &quot;dashed&quot;, size = 1) +
+  geom_density(fill=&quot;red&quot;, alpha=.2, aes(y=10 * ..count..,))</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <p>Here we can see the mean of the total stat, which is ~440. We can also see that
 the most common total base stats are between 480 and 500.</p>
 <p>But what are the best and the worst Pokemon? To find this out we can combine
 our quickAnalysis function with dplyr’s filter function.</p>
-<pre class="r"><code>best_pkmn &lt;- pokemon_data %&gt;%
-  filter(Total==unlist(quickAnalysis(pokemon_data[,4], 4)[3]))
-best_pkmn[,2:4]</code></pre>
-<pre><code>##                     Name             Type Total
-## 1   Mewtwo Mega Mewtwo X Psychic Fighting   780
-## 2   Mewtwo Mega Mewtwo Y          Psychic   780
-## 3 Rayquaza Mega Rayquaza    Dragon Flying   780</code></pre>
+<pre class="r"><code>(best_pkmn &lt;- pD %&gt;% filter(Total==max(Total)))</code></pre>
+<pre><code>## # A tibble: 3 x 10
+##     `#` Name       Type     Total    HP Attack Defense `Sp. Atk` `Sp. Def` Speed
+##   &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1   150 Mewtwo Me~ Psychic~   780   106    190     100       154       100   130
+## 2   150 Mewtwo Me~ Psychic    780   106    150      70       194       120   140
+## 3   384 Rayquaza ~ Dragon ~   780   105    180     100       180       100   115</code></pre>
 <p>The best Pokemon are the mega evolutions of Mewtwo and Rayquaza with a base stat total of 780.</p>
-<pre class="r"><code>worst_pkmn &lt;- pokemon_data %&gt;%
-  filter(Total==unlist(quickAnalysis(pokemon_data[,4], 4)[4]))
-worst_pkmn[,2:4]</code></pre>
-<pre><code>##                   Name  Type Total
-## 1 Wishiwashi Solo Form Water   175</code></pre>
+<pre class="r"><code>(worst_pkmn &lt;- pD %&gt;% filter(Total==min(Total)))</code></pre>
+<pre><code>## # A tibble: 1 x 10
+##     `#` Name          Type  Total    HP Attack Defense `Sp. Atk` `Sp. Def` Speed
+##   &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1   746 Wishiwashi S~ Water   175    45     20      20        25        25    40</code></pre>
 <p>And the worst Pokemon is Wishiwashi’s solo form with a base stat total of 175.</p>
 <p>I also wanted to make a boxplot showing the different stats. To do that we had
 to reshape our dataframe from a wide-format to a long-format.</p>
 <pre class="r"><code>#reshaping data to plot
-plotDF &lt;- data.frame(type=c(rep(names(pokemon_data)[5], 1044), 
-                            rep(names(pokemon_data)[6], 1044),
-                            rep(names(pokemon_data)[7], 1044),
-                            rep(names(pokemon_data)[8], 1044),
-                            rep(names(pokemon_data)[9], 1044),
-                            rep(names(pokemon_data)[10], 1044)),
-                     value=c(pokemon_data[,5],
-                             pokemon_data[,6],
-                             pokemon_data[,7],
-                             pokemon_data[,8],
-                             pokemon_data[,9],
-                             pokemon_data[,10]))
+type_v &lt;- vector()
 
-head(plotDF)</code></pre>
-<pre><code>##   type value
-## 1   HP    45
-## 2   HP    60
-## 3   HP    80
-## 4   HP    80
-## 5   HP    39
-## 6   HP    58</code></pre>
+for (i in 5:10){
+  type_v &lt;- c(type_v, rep(pD %&gt;% select(i) %&gt;% names(), 1044))
+}</code></pre>
+<pre><code>## Note: Using an external vector in selections is ambiguous.
+## i Use `all_of(i)` instead of `i` to silence this message.
+## i See &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;.
+## This message is displayed once per session.</code></pre>
+<pre class="r"><code>value_v &lt;- vector()
+
+for (i in 5:10){
+  value_v &lt;- c(value_v, pD %&gt;% select(i) %&gt;% pull())
+}
+
+
+plotDF &lt;- data.frame(type_v, value_v)</code></pre>
+<p>When using dplyr slice or select commands be sure to also use pull() to transform
+the data into a vector.</p>
 <p>Now we are able to create a boxplot.</p>
-<pre class="r"><code>d_stats &lt;- ggplot(plotDF, aes(x=value, y=type, color=type)) +
-  geom_boxplot()
-d_stats</code></pre>
-<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(plotDF, aes(x=value_v, y=type_v, color=type_v)) +
+  geom_point() +
+  geom_boxplot(alpha=0.8)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <p>We can see again that the attack stat has the highest median.
 It’s also visible that the HP stat has a lot of outliers.</p>
 <p>As always you can find the code for the <a href="https://github.com/SvenNekula/webcrawler" target="_blank">crawler</a> and the

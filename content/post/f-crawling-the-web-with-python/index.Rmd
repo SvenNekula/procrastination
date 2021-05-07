@@ -114,13 +114,12 @@ and analyze it.
 Before analyzing the data I opened the csv file in excel and transformed it to 
 a .xslx file, because it makes it easier to work with (in excel).
 To load the .xslx file into RStudio I used the 'readxl' package. I also used 
-'dplyr' and 'ggplot2' to filter and visualize the data. 
+'dplyr' and 'ggplot2' from the tidyverse package to filter and visualize the data. 
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 #loading packages
 library(readxl)
-library(dplyr)
-library(ggplot2)
+library(tidyverse)
 
 #loading data
 pData <- read_excel("P:\\GitHub\\webcrawler\\pokemon_list.xlsx")
@@ -133,15 +132,6 @@ Now we can get an overview of the data.
 str(pData)
 ```
 
-As you can see the data is the 'tibble'-format. I wanted to change that and turn 
-the data into a dataframe. To do that I used the as.data.frame function.
-
-```{r}
-#converting tibble into df
-dfp <- as.data.frame(pData)
-str(dfp)
-```
-
 If you have knowledge of Pokemon, you probably know that Eternamax is the strongest
 Pokemon. However it's just used in an NPC fight and can't be used by the player,
 which is why it has to be removed from the dataset, because it's an extreme outlier.
@@ -150,49 +140,15 @@ never used it.
 
 ```{r}
 #removing Eternamax
-max(dfp$Total)
-pokemon_data <- subset(dfp, dfp$Total<1125)
+pD <- pData %>% filter(Total<1125)
 ```
 
-After finalizing the dataframe I wanted to work with, I wrote a function called
-'quickAnalysis'. Pokemon have different stats, for example attack or defense.
-This function returns a list with the mean, median, max and min of a stat. 
-The function takes 2 arguments: x, i.e. the column of the dataframe and col, i.e.
-the perticular column. I chose to do it this way, so that the function can also return
-the name of the stat.
+After finalizing the dataframe I wanted to work with, I wanted to get a more
+detailled overview of the distributions of the stats. I used the summary command 
+for all the stat columns to see the min, max, median and mean of my data.
 
 ```{r}
-quickAnalysis <- function(x, col){
-  v_mean <- mean(x)
-  v_median <- median(x)
-  v_max <- max(x)
-  v_min <- min(x)
-  ql <- list(v_mean, v_median, v_max, v_min)
-  names(ql) <- c(paste("Mean of", names(dfp)[col], "Stat"), 
-                 paste("Median of", names(dfp)[col], "Stat"), 
-                 paste("Max of", names(dfp)[col], "Stat"),
-                 paste("Min of", names(dfp)[col], "Stat"))
-  return(ql)
-}
-```
-
-We can plug in the different stats into the function now. 
-
-```{r}
-#total
-quickAnalysis(pokemon_data[,4], 4)
-#hp
-quickAnalysis(pokemon_data[,5], 5)
-#att
-quickAnalysis(pokemon_data[,6], 6)
-#def
-quickAnalysis(pokemon_data[,7], 7)
-#spatk
-quickAnalysis(pokemon_data[,8], 8)
-#spdef
-quickAnalysis(pokemon_data[,9], 9)
-#speed
-quickAnalysis(pokemon_data[,10], 10)
+pD %>% select(4:10) %>% summary()
 ```
 
 As you can see the max total stat of any Pokemon is 780, while the min is 175.
@@ -201,12 +157,10 @@ use a histogram.
 
 ```{r}
 #plotting data:
-ht <- ggplot(pokemon_data, aes(x=Total)) + geom_histogram(binwidth = 10, color="black", fill="white") +
+ggplot(pD, aes(x=Total)) + geom_histogram(binwidth = 10, color="black", fill="white") +
   scale_x_continuous(breaks = seq(0, 1150, 50)) +
-  geom_vline(xintercept = mean(pokemon_data$Total), col="blue", linetype = "dashed", size = 1) +
+  geom_vline(xintercept = mean(pD$Total), col="blue", linetype = "dashed", size = 1) +
   geom_density(fill="red", alpha=.2, aes(y=10 * ..count..,))
-
-ht
 ```
 
 Here we can see the mean of the total stat, which is ~440. We can also see that 
@@ -217,17 +171,13 @@ But what are the best and the worst Pokemon? To find this out we can combine
 our quickAnalysis function with dplyr's filter function.
 
 ```{r}
-best_pkmn <- pokemon_data %>%
-  filter(Total==unlist(quickAnalysis(pokemon_data[,4], 4)[3]))
-best_pkmn[,2:4]
+(best_pkmn <- pD %>% filter(Total==max(Total)))
 ```
 
 The best Pokemon are the mega evolutions of Mewtwo and Rayquaza with a base stat total of 780.
 
 ```{r}
-worst_pkmn <- pokemon_data %>%
-  filter(Total==unlist(quickAnalysis(pokemon_data[,4], 4)[4]))
-worst_pkmn[,2:4]
+(worst_pkmn <- pD %>% filter(Total==min(Total)))
 ```
 
 And the worst Pokemon is Wishiwashi's solo form with a base stat total of 175.
@@ -238,28 +188,32 @@ to reshape our dataframe from a wide-format to a long-format.
 
 ```{r}
 #reshaping data to plot
-plotDF <- data.frame(type=c(rep(names(pokemon_data)[5], 1044), 
-                            rep(names(pokemon_data)[6], 1044),
-                            rep(names(pokemon_data)[7], 1044),
-                            rep(names(pokemon_data)[8], 1044),
-                            rep(names(pokemon_data)[9], 1044),
-                            rep(names(pokemon_data)[10], 1044)),
-                     value=c(pokemon_data[,5],
-                             pokemon_data[,6],
-                             pokemon_data[,7],
-                             pokemon_data[,8],
-                             pokemon_data[,9],
-                             pokemon_data[,10]))
+type_v <- vector()
 
-head(plotDF)
+for (i in 5:10){
+  type_v <- c(type_v, rep(pD %>% select(i) %>% names(), 1044))
+}
+
+value_v <- vector()
+
+for (i in 5:10){
+  value_v <- c(value_v, pD %>% select(i) %>% pull())
+}
+
+
+plotDF <- data.frame(type_v, value_v)
 ```
+
+When using dplyr slice or select commands be sure to also use pull() to transform
+the data into a vector.
+
 
 Now we are able to create a boxplot.
 
 ```{r}
-d_stats <- ggplot(plotDF, aes(x=value, y=type, color=type)) +
-  geom_boxplot()
-d_stats
+ggplot(plotDF, aes(x=value_v, y=type_v, color=type_v)) +
+  geom_point() +
+  geom_boxplot(alpha=0.8)
 ```
 
 We can see again that the attack stat has the highest median. 
